@@ -1,0 +1,47 @@
+# Introduction 
+- note : https://github.com/kodekloudhub/certified-kubernetes-administrator-course
+- Kubernetes The Hard Way : https://github.com/mmumshad/kubernetes-the-hard-way
+- Kubernetes는 이동 플랫폼으로 프로덕션 등급 애플리케이션 등급 호스팅용
+- 시험기간 내내 Kubernetes 공식 문서 페이지를 활용할 수 있음 
+- 참고 자료 
+  - Certified Kubernetes Administrator: https://www.cncf.io/certification/cka/
+  - Exam Curriculum (Topics): https://github.com/cncf/curriculum
+  - Candidate Handbook: https://www.cncf.io/certification/candidate-handbook
+  - Exam Tips: http://training.linuxfoundation.org/go//Important-Tips-CKA-CKAD
+- 할인 코드 : DEVOPS15 (15%) 
+- 필요한 사전지식
+  - containers, applications, yammel files, architecture, networking, load balancing, a variety of monitoring tools, auto scaling, configuration, security storage
+
+- KUBERNETES for the Abosulte Beginners 
+  - Lab Environment 
+  - Pre-requisites - YAML
+  - PODs, Deployments 
+  - Networking Basics
+  - Services
+  - Micro-Services Architecture
+  - Demos
+  - Coding Exercise
+
+- KUBERNETES for Administrators
+  - HA Deployment 
+  - Kubernetes Scheduler
+  - Logging/Monitoring
+  - Application Lifecycle
+  - Maintenance
+  - Security
+  - Troubleshooting
+  - Core Concept
+  - Demos
+  - Coding Exercise 
+
+- KUBERNETES for Developers
+  - Core Concepts
+  - ConfigMaps, Secrets 
+  - Multi-Container Pods
+  - Readiness & liveness probes
+  - Logging & Monitoring 
+  - Pod Design
+  - Jobs
+  - Services & Networking
+  - Demos 
+  - Coding Exercise
