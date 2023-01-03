@@ -1,6 +1,7 @@
 # study 
 [Day1](#cluster-architecture)<br>
 [Day2](#kubelet)<br>
+[Day3](#recap---replicasets)<br>
 
 # Cluster Architecture 
 - 쿠버네티스 
@@ -195,3 +196,84 @@
   - > kubectl create -f pod-definition.yml : pod 생성 (kubectl apply -f pod.yaml / -f 옵션을 사용하여 파일 이름을 전달함)
   - > kubectl get pods : 사용 가능한 파드 목록 확인
   - > kubectl describe pod myapp-pd : 파드에 대한 자세한 정보 확인 
+
+# Recap - ReplicaSets 
+- Replication Controller 
+  - 컨트롤러는 쿠버네티스의 두뇌. 쿠버네티스 개체를 모니터링하는 프로세스 
+  - ![image](https://user-images.githubusercontent.com/47103479/210241406-e7972d60-208d-43c1-b3e3-4a52f3a21b6c.png)
+    - 복제 컨트롤러가 있으면 기존 것이 실패했을 때 새 파드를 자동으로 불러옴 
+  - ![image](https://user-images.githubusercontent.com/47103479/210242242-cf309a86-ffa7-4ca6-9855-eacf1a1e1979.png)
+    - load를 공유하기 위해 여러 파드를 생성하는 것 
+  - Replication Controller - 이전 기술로 Replica Set으로 대체됨 
+  - ![image](https://user-images.githubusercontent.com/47103479/210242594-e82f5103-5e5c-4f58-b112-f8747a1c1766.png)
+    - > kubectl create f replicaset definition.yml : 복제 세트 생성 
+    - > kubectl get replicaset : 생성된 복제 세트 목록 보기 
+    - > kubectl get pods
+- Replica Set
+  - ![image](https://user-images.githubusercontent.com/47103479/210243689-9dd1a34c-d1d5-4242-873c-18b20aeeb1f8.png)
+    - apps/V1으로 apiVersion이 다름  / kind : ReplicaSet
+    - Replica Set에는 선택 정의가 필요함 (선택 섹션은 어떤 파드가 아래에 있는지 식별함) - 속성에 대해 사용자 입력이 필요함 
+    - 3개의 복제본으로 시작해서 6개의 복제본으로 확장하기
+      - > kubectl replace f replicaset definition.yml : 복제본 수를 업데이트 하기
+      - > kubectl scale replicas=6 f replicaset definition.yml : kube control scale command 실행
+      - > kubectl scale replicas=6 replicaset myapp replicaset 
+- Commands
+  - > kubectl delete replicaset myapp replicaset : 복제 세트 삭제
+  - > kubectl replace f replicaset definition.yml : 복제 세트 교체 또는 업데이트 
+
+# Deployments 
+- 롤링업데이트 : 인스턴스 업그레이드를 할 때 하나씩 업그레이드를 하는 것 
+- ![image](https://user-images.githubusercontent.com/47103479/210245780-23677266-c91e-4d5f-afc0-5ab5692699e7.png)
+  - 각 컨테이너는 파드에 캡슐화되고 파드는 복제 컨트롤러 또는 Replica Set을 사용해 여러 개 배포됨 - 기본 인스턴스를 원활하게 업그레이드 하기 위해 롤링 업데이트 사용, 변경 사항 실행 취소 필요에 따라 변경 사항을 일시 중지하고 다시 시작함 
+- Definition
+  - ![image](https://user-images.githubusercontent.com/47103479/210245999-aef07f8d-7dfb-4365-824b-5d0586678d3e.png)
+  - > kubectl create f deployment definition.yml
+  - > kubectl get deployments : 배포시 자동으로 replicaset 생성 
+  - > kubectl get replicaset 
+  - > kubectl get pods
+- ReplicaSet과 배포의 차이는 배포라고 하는 새로운 쿠버네티스 개체 
+- Commands
+  - > kubectl get all : 생성된 모든 개체를 한 번에 보기 
+
+# Tip
+- https://kubernetes.io/docs/reference/kubectl/conventions/
+- ``` bash
+  # NGINX 포드 생성
+  kubectl run nginx --image=nginx
+  
+  # POD 매니페스트 YAML 파일(-o yaml)을 생성합니다. 만들지 마세요(--드라이런)
+  kubectl run nginx --image=nginx --dry-run=client -o yaml
+
+  # 배포 만들기
+  kubectl create deployment --image=nginx nginx
+
+  # 배포 YAML 파일(-o yaml)을 생성합니다. 만들지 마세요(--드라이런)
+  kubectl create deployment --image=nginx nginx --dry-run=client -o yaml
+  
+  # 배포 YAML 파일(-o yaml)을 생성합니다. 복제본 4개(--replicas=4)로 생성하지 마세요(--dry-run).
+  kubectl create deployment --image=nginx nginx --dry-run=client -o yaml > nginx-deployment.yaml
+
+  # 파일에 저장하고 필요에 따라 파일을 변경(예: 복제본 추가)한 다음 배포를 생성합니다.
+  kubectl create -f nginx-deployment.yaml
+
+  # k8s 버전 1.19+에서는 --replicas 옵션을 지정하여 4개의 복제본으로 배포를 생성할 수 있습니다.
+  kubectl create deployment --image=nginx nginx --replicas=4 --dry-run=client -o yaml > nginx-deployment.yaml
+  ```
+
+# Services
+- 내부의 다양한 구성 요소 사이와 응용 프로그램 외부의 통신을 가능하게함. 애플리케이션을 함께 연결하는데 도움이됨 
+- Pods,ReplicaSet,Deployments와 같은 object로 
+- NodePort 서비스 : 노드에서 포트를 수신하는것, 웹 애플리케이션을 실행하는 파드의 포트로 요청 전달하는 것, 서비스가 노드의 포트를 수신하기 때문에 파드에 요청을 전달함 
+- Services Types
+  - NodePort : 노드의 포트에서 액세스할 수 있음 
+    - ![image](https://user-images.githubusercontent.com/47103479/210375988-7c0a5430-5eb5-4aa2-8fb7-f85f996b3478.png)
+    - 노드 포트는 30,000 에서 32,767 사이의 유효한 범위에만 있을 수 있음 
+    - ![image](https://user-images.githubusercontent.com/47103479/210376241-e69a3d70-b2e3-48e6-96cb-53fcddaeb514.png)
+      - selector를 이용해서 파드를 연결함 
+    - > kubectl create -f service-definition.yml
+    - > kubectl get services
+    - > curl http://192.168.1.2:30008
+    - ![image](https://user-images.githubusercontent.com/47103479/210377285-e6c5752c-765c-4169-823e-4bbc0cb9ca82.png)
+      - 단일 파드, 단일 노드, 단일 노드의 여러 파드에서 서비스는 동일하게 생성됨. 파드가 제거되거나 추가되면 서비스가 자동으로 업데이트되고 매우 유연하고 적응력있음  
+  - ClusterIP : 서로 다른 서비스간에 소통을 가능하게 하는 가상 IP를 생성함 
+  - LoadBalancer : 클라우드 공급자에서 애플리케이션을 위한 로드 밸런서를 지원함. 부하를 분산시킴 
