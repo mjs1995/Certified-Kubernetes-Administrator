@@ -1,6 +1,7 @@
 # study 
 [Day2-PODs](#practice-test---pods)<br>
 [Day3-ReplicaSets](#practice-test---replicasets)<br>
+[Day3-Deployments](#practice-test---deployments)<br>
 
 # Practice Test - PODs
 1. <details>
@@ -294,6 +295,113 @@
      ```bash
      kubectl edit replicaset new-replica-set 
      kubectl scale rs new-replica-set --replicas 2
+     ```
+
+     </details>
+
+# Practice Test - Deployments
+1. <details>
+    <summary>How many PODs exist on the system?</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+2. <details>
+    <summary>How many ReplicaSets exist on the system?</summary>
+  
+     ```bash
+     kubectl get rs
+     ```
+
+     </details>
+
+3. <details>
+    <summary>How many Deployments exist on the system?</summary>
+  
+     ```bash
+     kubectl get deployment
+     ```
+
+     </details>
+
+4. <details>
+    <summary>How many Deployments exist on the system?</summary>
+  
+     ```bash
+     kubectl get deployment
+     ```
+
+     </details>
+
+
+5. <details>
+    <summary>How many ReplicaSets exist on the system now?</summary>
+  
+     ```bash
+     kubectl get rs
+     ```
+
+     </details>
+
+6. <details>
+    <summary>How many PODs exist on the system now?</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+7. <details>
+    <summary>Out of all the existing PODs, how many are ready?</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+8. <details>
+    <summary>What is the image used to create the pods in the new deployment?</summary>
+  
+     ```bash
+     kubectl describe pods | grep image
+     kubectl get deployment -o wide
+     ```
+
+     </details>
+
+9. <details>
+    <summary>Why do you think the deployment is not ready?</summary>
+  
+     ```bash
+     kubectl describe pods | grep image
+     ```
+
+     </details>
+
+10. <details>
+    <summary>Create a new Deployment using the deployment-definition-1.yaml file located at /root/.</summary>
+  
+     ```bash
+     kubectl create -f deployment-definition-1.yaml 
+     vi deployment-definition-1.yaml # kind : deployment -> kind : Deployment
+     kubectl create -f deployment-definition-1.yaml
+     ```
+
+     </details>
+
+11. <details>
+    <summary>Create a new Deployment with the below attributes using your own deployment definition file.Name: httpd-frontend;Replicas: 3;Image: httpd:2.4-alpine</summary>
+  
+     ```bash
+     kubectl create deployment httpd-frontend --image=httpd:2.4-alpine --replicas=3
+     kubectl get deploy
+   
+     kubectl create -f my-deployment.yaml
      ```
 
      </details>
