@@ -1,3 +1,7 @@
+# study 
+[Day2-PODs](#practice-test---pods)<br>
+[Day3-ReplicaSets](#practice-test---replicasets)<br>
+
 # Practice Test - PODs
 1. <details>
    <summary>How many pods exist on the system? In the current(default) namespace.</summary>
@@ -131,6 +135,165 @@
 
      # 3
      kubectl set image pod/redis redis=redis 
+     ```
+
+     </details>
+
+# Practice Test - ReplicaSets
+1. <details>
+    <summary>How many PODs exist on the system? </summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+2. <details>
+    <summary>How many ReplicaSets exist on the system? </summary>
+  
+     ```bash
+     kubectl get replicaset
+     ```
+
+     </details>
+
+3. <details>
+    <summary>How about now? How many ReplicaSets do you see? </summary>
+  
+     ```bash
+     kubectl get replicaset
+     ```
+
+     </details>
+     
+4. <details>
+    <summary>How many PODs are DESIRED in the new-replica-set? </summary>
+  
+     ```bash
+     kubectl get replicaset
+     ```
+
+     </details>
+
+> N
+5. <details>
+    <summary>What is the image used to create the pods in the new-replica-set? </summary>
+  
+     ```bash
+     kubectl describe pod new-replica-set | grep image
+   
+     kubectl get rs -o wide
+     ```
+
+     </details>
+     
+6. <details>
+    <summary>How many PODs are READY in the new-replica-set? </summary>
+  
+     ```bash   
+     kubectl get rs
+     ```
+
+     </details>
+
+7. <details>
+    <summary>Why do you think the PODs are not ready? </summary>
+  
+     ```bash
+     kubectl describe pods
+     ```
+
+     </details>
+
+8. <details>
+    <summary>Delete any one of the 4 PODs. </summary>
+  
+     ```bash
+     kubectl get pods
+     kubectl delete pod new-replica-set-lzp4m
+     ```
+
+     </details>
+     
+9. <details>
+    <summary>How many PODs exist now? </summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+10. <details>
+    <summary>Why are there still 4 PODs, even after you deleted one? </summary>
+  
+     ```bash
+     ReplicaSets ensures that desired number of PODs always run
+     ```
+
+     </details>
+
+11. <details>
+    <summary>Create a ReplicaSet using the replicaset-definition-1.yaml file located at /root/. </summary>
+  
+     ```bash
+     kubectl explain replicaset | grep VERSION # VERSION:  apps/v1
+     vi replicaset-definition-1.yaml
+     kubectl create -f replicaset-definition-1.yaml
+     ```
+
+     </details>
+
+12. <details>
+    <summary>Fix the issue in the replicaset-definition-2.yaml file and create a ReplicaSet using it. </summary>
+  
+     ```bash
+     vi replicaset-definition-2.yaml # 라벨 동일하게 만듬
+     kubectl create -f replicaset-definition-2.yaml
+     ```
+
+     </details>
+
+13. <details>
+    <summary>Delete the two newly created ReplicaSets - replicaset-1 and replicaset-2 </summary>
+  
+     ```bash
+     kubectl delete replicaset replicaset-1
+     kubectl delete rs replicaset-2
+      
+     kubectl delete replicaset replicaset-1 replicaset-2
+     ```
+
+14. <details>
+    <summary>Fix the original replica set new-replica-set to use the correct busybox image. Either delete and recreate the ReplicaSet or Update the existing ReplicaSet and then delete all PODs, so new ones with the correct image will be created.</summary>
+  
+     ```bash
+     kubectl edit replicaset new-replica-set # Image busybox777 -> busybox , 이미지 이름이 업데이트 되어도 파드는 자동으로 생성되지 않음. 삭제하고 다시 생성해야함 
+     kubectl describe rs
+     kubectl get pods
+     kubectl delete pod new-replica-set-gdx9p new-replica-set-sc49p new-replica-set-zxcnm new-replica-set-4b5wr
+     kubectl get rs
+     ```
+
+     </details>
+
+15. <details>
+    <summary>Scale the ReplicaSet to 5 PODs.Use kubectl scale command or edit the replicaset using kubectl edit replicaset.</summary>
+  
+     ```bash
+     kubectl edit replicaset new-replica-set # 직접 변경
+     kubectl scale rs new-replica-set --replicas 5 
+     ```
+
+     </details>
+
+16. <details>
+    <summary>Now scale the ReplicaSet down to 2 PODs.Use the kubectl scale command or edit the replicaset using kubectl edit replicaset.</summary>
+  
+     ```bash
+     kubectl edit replicaset new-replica-set 
+     kubectl scale rs new-replica-set --replicas 2
      ```
 
      </details>
