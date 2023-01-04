@@ -2,6 +2,7 @@
 [Day1](#cluster-architecture)<br>
 [Day2](#kubelet)<br>
 [Day3](#recap---replicasets)<br>
+[Day4](#services)<br>
 
 # Cluster Architecture 
 - 쿠버네티스 
@@ -258,6 +259,11 @@
 
   # k8s 버전 1.19+에서는 --replicas 옵션을 지정하여 4개의 복제본으로 배포를 생성할 수 있습니다.
   kubectl create deployment --image=nginx nginx --replicas=4 --dry-run=client -o yaml > nginx-deployment.yaml
+  
+  Kubectl expose deployment nginx --port 80
+  kubectl edit deployment nginx
+  kubectl scale deployment nginx --replicas=5
+  kubectl set image deployment nginx nginx=nginx:1.18
   ```
 
 # Services
@@ -276,4 +282,99 @@
     - ![image](https://user-images.githubusercontent.com/47103479/210377285-e6c5752c-765c-4169-823e-4bbc0cb9ca82.png)
       - 단일 파드, 단일 노드, 단일 노드의 여러 파드에서 서비스는 동일하게 생성됨. 파드가 제거되거나 추가되면 서비스가 자동으로 업데이트되고 매우 유연하고 적응력있음  
   - ClusterIP : 서로 다른 서비스간에 소통을 가능하게 하는 가상 IP를 생성함 
+    - IP는 정적이 아님. 파드는 언제든지 다운될 수 있고 항상 새로운 파드가 생성됨 -> 응용 프로그램 간에 내부 통신을 위해 IP주소에 의존할 수 없음 
+    - ![image](https://user-images.githubusercontent.com/47103479/210381936-00337001-ca88-4fd8-8c14-d87149cac1bd.png)
+      - 쿠버네티스 클러스터에서 쉽게 마이크로 서비스 기반 애플리케이션을 효과적으로 포할 수 있음. 각 레이어의 크기를 조정할 수 있고 커뮤니케이션에 영향을 주지 않고 다양한 서비스 사이를 필요에 따라 이동가느함. 
+      - 각 서비스에는 IP와 이름이 할당됨(클러스터 내부에서 사용해야 하는 이름). 다른 파드에서 서비스에 액세스하는데 이를 클러스터 IP라 칭함 
+    - ![image](https://user-images.githubusercontent.com/47103479/210382648-47a042f3-53c8-4602-b19a-96fde5aa3d77.png)
+      - > kubectl create -f service-definition.yml
+      - > kubectl get services
   - LoadBalancer : 클라우드 공급자에서 애플리케이션을 위한 로드 밸런서를 지원함. 부하를 분산시킴 
+    - 작업자 노드 포트에서 외부 응용 프로그램을 사용할 수 있도록 도움
+    - 로드밸러서용 새 VM을 설치함, AJ/Proxy 또는 nginx등과 같은 적합한 로드밸런서를 설치 및 구성, 트래픽을 라우팅하도록 기본 노드에 로드 밸런서를 구성함 
+
+# NameSpace
+- ![image](https://user-images.githubusercontent.com/47103479/210569294-87074577-81d2-4dc0-9935-c0abc966a6b5.png)
+  - 파드와 같은 객체 생성, 클러스터의 배포 및 서비스 등을 namespace 공간에서 해옴. 클러스터가 처음 설정될 때 쿠버네티스에 의해 자동으로 생성됨 
+  - Kube-system은 내부 목적으로 네트워킹 솔루션에 필요한 DNS 서비스 등 사용자로부터 격리하고 실수로 삭제하는것을 방지하기 위해 다른 namespace 공간에 생성함 
+  - kube-public은 모든 사용자가 자원을 사용할 수 있어야 함
+- ![image](https://user-images.githubusercontent.com/47103479/210570671-cf50e500-e89c-4399-8558-7b49cf8c0c42.png)
+- > kubectl get pods --namespace=kube-system : 다른 네임스페이스에 있는 파드들도 나열 
+- > kubectl create -f pod-definition.yml --namespace=dev : 다른 네임스페이스 파드 생성 
+- > kubectl create namespace dev : 네임스페이스 생성 
+- ![image](https://user-images.githubusercontent.com/47103479/210570713-350b6d7a-01d7-4925-a84c-7487b9bb316b.png)
+  - > kubectl config set-context $(kubectl config current-context) --namespace=dev : 현재 컨텍스트의 네임스페이스를 dev로 설정 
+  - > kubectl get pods --all-namespace
+- ![image](https://user-images.githubusercontent.com/47103479/210570969-c58461f3-a619-4f5d-b46d-8e1ad1aa875b.png)
+
+# Imperative vs Declarative
+- Infrastructure as Code
+  - Imperative
+    - 1. VM이 필요함
+    - 2. NGINX 소프트웨어를 설치해야함 
+    - 3. 포트를 8080으로 설정
+    - 4. 웹 파일 경로를 정의함
+    - 5. 애플리케이션 소스 코드가 저장되는 위치 지정 
+    - 6. NGINX 서버 실행 
+  - Declarative
+    - VM Name : web-server
+    - Package : nginx
+    - Port : 8080
+    - Path : /var/www/nginx
+    - Code : GIT Repo -X
+- Kubernetes
+  - Imperative
+    - Create Objects
+      - kbectl run --image=nginx nginx
+      - kubectl create deployment --image=nginx nginx
+      - kubectl expose deployment nginx --port 80
+    - Update Objects
+      - kubectl edit deployment nginx
+      - kubectl scale deployment nginx --replicas=5
+      - kubectl set image deployment nginx nginx=nginx:1.18
+    - kubectl create -f nginx.yaml
+    - kubectl replace -f nginx.yaml
+    - kubectl delete -f nginx.yaml
+  - Declarative 
+    - Create Objects
+      - kubectl apply -f nginx.yaml
+    - Update Objects
+      - kubectl apply -f /path/to/config-files
+      - kubectl apply -f nginx.yaml
+- Declarative의 경우 단계별 지침을 제공하지 않음. 최종 목적지만 선언함. 목적지에 도달하기 위해 어떻게 할 것이 아니라 무엇을 할 것인지 지정하는 것 
+  - 오케스트레이션 툴 : Ansible, Puppet,Chef, Terraform
+- 명령형(Imperative) 접근 방식 항상 현재 구성을 알고 있어야 하므로 관리자에게 매우 부담스러움 
+- kubectl apply -f nginx.yaml
+  - Local file, Kubernets, JSON 세 개의 섹션을 비교하게됨
+  - 쿠버네티스 클러스터 자체에 annotations: kubectl.kubernetes.io/last-applied-configuration:{JSON} 형태로 저장됨.
+
+# tips
+- --dry-run: 기본적으로 명령이 실행되는 즉시 리소스가 생성됨
+  - 단순히 명령을 테스트하려는 경우 --dry-run=client옵션을 사용. 리소스를 생성하는 것이 아니라 리소스를 생성할 수 있는지 여부와 명령이 올바른지 여부를 알려줌
+- -o yaml: 리소스 정의를 YAML 형식으로 화면에 출력함 
+- ```bash
+  # NGINX 포드 생성
+  kubectl run nginx --image=nginx
+  
+  # POD 매니페스트 YAML 파일(-o yaml)을 생성합니다. 만들지 마세요(--드라이런)
+  kubectl run nginx --image=nginx --dry-run=client -o yaml
+
+  # 배포 만들기
+  kubectl create deployment --image=nginx nginx
+
+  # 배포 YAML 파일(-o yaml)을 생성합니다. 만들지 마세요(--드라이런)
+  kubectl create deployment --image=nginx nginx --dry-run=client -o yaml
+
+  # 4개의 복제본으로 배포 생성
+  kubectl create deployment nginx --image=nginx --replicas=4
+  kubectl scale deployment nginx --replicas=4
+  kubectl create deployment nginx --image=nginx --dry-run=client -o yaml > nginx-deployment.yaml
+
+  # 포트 6379에서 포드 redis를 노출하기 위해 ClusterIP 유형의 redis-service라는 서비스를 만듭니다.
+  kubectl expose pod redis --port=6379 --name redis-service --dry-run=client -o yaml
+  kubectl create service clusterip redis --tcp=6379:6379 --dry-run=client -o yaml
+  
+  # NodePort 유형의 nginx라는 서비스를 만들어 노드의 포트 30080에서 포드 nginx의 포트 80을 노출합니다.
+  kubectl expose pod nginx --type=NodePort --port=80 --name=nginx-service --dry-run=client -o yaml
+  kubectl create service nodeport nginx --tcp=80:80 --node-port=30080 --dry-run=client -o yaml
+  ```
