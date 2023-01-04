@@ -2,6 +2,9 @@
 [Day2-PODs](#practice-test---pods)<br>
 [Day3-ReplicaSets](#practice-test---replicasets)<br>
 [Day3-Deployments](#practice-test---deployments)<br>
+[Day4-Services](#practice-test---services)<br>
+[Day4-Namespace](#practice-test---namespace)<br>
+[Day4-Imperative Commands](#practice-test---imperative-commands)<br>
 
 # Practice Test - PODs
 1. <details>
@@ -402,6 +405,231 @@
      kubectl get deploy
    
      kubectl create -f my-deployment.yaml
+     ```
+
+     </details>
+
+# Practice Test - Services
+1. <details>
+    <summary>How many Services exist on the system?</summary>
+  
+     ```bash
+     kubectl get services
+     ```
+
+     </details>
+
+3. <details>
+    <summary>What is the type of the default kubernetes service?</summary>
+  
+     ```bash
+     kubectl get services
+     ```
+
+     </details>
+
+4. <details>
+    <summary>What is the targetPort configured on the kubernetes service?</summary>
+  
+     ```bash
+     kubectl describe services | grep TargetPort
+     ```
+
+     </details>
+
+5. <details>
+    <summary>How many labels are configured on the kubernetes service?</summary>
+  
+     ```bash
+     kubectl describe services
+     
+     ```
+
+     </details>
+
+6. <details>
+    <summary>How many Endpoints are attached on the kubernetes service?</summary>
+  
+     ```bash
+     kubectl describe services
+     ```
+
+     </details>
+
+7. <details>
+    <summary>How many Deployments exist on the system now?</summary>
+  
+     ```bash
+     kubectl get deployments
+     ```
+
+     </details>
+
+8. <details>
+    <summary>What is the image used to create the pods in the deployment?</summary>
+  
+     ```bash
+     kubectl get deployments
+     kubectl get deployment -o wide
+     kubectl describe deployments | grep Image
+     ```
+
+     </details>
+
+9. <details>
+    <summary>Are you able to accesss the Web App UI?Try to access the Web Application UI using the tab simple-webapp-ui above the terminal.</summary>
+  
+     ```bash
+     가운데 상단의 simple-webapp-ui 클릭
+     ```
+
+     </details>
+
+10. <details>
+    <summary>Create a new service to access the web application using the service-definition-1.yaml file.</summary>
+  
+     ```bash
+     vi service-definition-1.yaml
+     kubectl create -f service-definition-1.yaml
+     ```
+
+     </details>
+
+# Practice Test - Namespace
+1. <details>
+    <summary>How many Namespaces exist on the system?</summary>
+  
+     ```bash
+     kubectl get namespace
+     ```
+
+     </details>
+
+2. <details>
+    <summary>How many pods exist in the research namespace?</summary>
+  
+     ```bash
+     kubectl get pods --namespace=research
+     ```
+
+     </details>
+
+> H
+3. <details>
+    <summary>Create a POD in the finance namespace.</summary>
+  
+     ```bash
+     kubectl run redis --image=redis --namespace=finance
+     kubectl get pods -n=finance
+     ```
+
+     </details>
+
+4. <details>
+    <summary>Which namespace has the blue pod in it?</summary>
+  
+     ```bash
+     kubectl get pods --all-namespaces
+     ```
+
+     </details>
+
+6. <details>
+    <summary>What DNS name should the Blue application use to access the database db-service in its own namespace - marketing?You can try it in the web application UI. Use port 6379.</summary>
+  
+     ```bash
+     kubectl get pods -n=marketing
+     kubectl get svc -n=marketing
+     ```
+
+     </details>
+
+7. <details>
+    <summary>What DNS name should the Blue application use to access the database db-service in the dev namespace?You can try it in the web application UI. Use port 6379.</summary>
+  
+     ```bash
+     kubectl get pods -n=marketing
+     kubectl get svc -n=marketing
+     kubectl get svc -n=dev
+     ```
+
+     </details>
+
+# Practice Test - Imperative Commands
+2. <details>
+    <summary>Deploy a pod named nginx-pod using the nginx:alpine image.</summary>
+  
+     ```bash
+     kubectl run nginx-pod --image=nginx:alpine
+     ```
+
+     </details>
+
+> N
+3. <details>
+    <summary>Deploy a redis pod using the redis:alpine image with the labels set to tier=db.</summary>
+  
+     ```bash
+     kubectl run redis --image=redis:alpine --labels="tier=db"
+     kubectl run redis --image=redis:alpine -l tier=db
+     ```
+
+     </details>
+
+4. <details>
+    <summary>Create a service redis-service to expose the redis application within the cluster on port 6379.</summary>
+  
+     ```bash
+     kubectl create service --help
+     kubectl create service clusterip --help
+     kubectl expose pod redis --port=6379 --name redis-service
+     kubectl get svc redis-service
+     ```
+
+     </details>
+
+5. <details>
+    <summary>Create a deployment named webapp using the image kodekloud/webapp-color with 3 replicas.</summary>
+  
+     ```bash
+     kubectl create deployment webapp --image=kodekloud/webapp-color --replicas=3
+     ```
+
+     </details>
+
+6. <details>
+    <summary>Create a new pod called custom-nginx using the nginx image and expose it on container port 8080.</summary>
+  
+     ```bash
+     kubectl run custom-nginx --image=nginx --port=8080
+     ```
+
+     </details>
+
+7. <details>
+    <summary>Create a new namespace called dev-ns.</summary>
+  
+     ```bash
+     kubectl create namespace dev-ns    
+     kubectl create ns dev-ns
+     ```
+
+     </details>
+
+8. <details>
+    <summary>Create a new deployment called redis-deploy in the dev-ns namespace with the redis image. It should have 2 replicas.</summary>
+  
+     ```bash
+     kubectl create deployment redis-deploy -n dev-ns --image redis --replicas 2
+     ```
+
+     </details>
+
+9. <details>
+    <summary>Create a pod called httpd using the image httpd:alpine in the default namespace. Next, create a service of type ClusterIP by the same name (httpd). The target port for the service should be 80.</summary>
+  
+     ```bash
+     kubectl run httpd --image httpd:alpine --expose --port 80
      ```
 
      </details>
