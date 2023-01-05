@@ -5,6 +5,9 @@
 [Day4-Services](#practice-test---services)<br>
 [Day4-Namespace](#practice-test---namespace)<br>
 [Day4-Imperative Commands](#practice-test---imperative-commands)<br>
+[Day5-Manual Scheduling](#practice-test---manual-scheduling)<br>
+[Day5-Labels and Selectors](#practice-test---labels-and-selectors)<br>
+[Day5-Taints and Tolerations](#practice-test---taints-and-tolerations)<br>
 
 # Practice Test - PODs
 1. <details>
@@ -630,6 +633,215 @@
   
      ```bash
      kubectl run httpd --image httpd:alpine --expose --port 80
+     ```
+
+     </details>
+
+# Practice Test - Manual Scheduling
+1. <details>
+    <summary>A pod definition file nginx.yaml is given. Create a pod using the file.</summary>
+  
+     ```bash
+     kubectl create -f nginx.yaml
+     ```
+
+     </details>
+
+2. <details>
+    <summary>What is the status of the created POD?</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+3. <details>
+    <summary>Why is the POD in a pending state?</summary>
+  
+     ```bash
+     kubectl describe pods nginx
+     kubectl get pods --namespace kube-system
+     ```
+
+     </details>
+
+4. <details>
+    <summary>Manually schedule the pod on node01.</summary>
+  
+     ```bash
+     vi nginx.yaml # nodeName : node01
+     kubectl replace --force -f nginx.yaml # kubectl delete -f nginx.yaml -> kubectl create -f nginx.yaml
+     ```
+
+     </details>
+
+5. <details>
+    <summary>Now schedule the same pod on the controlplane node.</summary>
+  
+     ```bash
+     vi nginx.yaml # nodeName : controlplane
+     kubectl replace --force -f nginx.yaml # kubectl delete -f nginx.yaml -> kubectl create -f nginx.yaml
+     kubectl get pods
+     ```
+
+     </details>
+
+# Practice Test - Labels and Selectors
+1. <details>
+    <summary>We have deployed a number of PODs. They are labelled with tier, env and bu. How many PODs exist in the dev environment (env)?</summary>
+  
+     ```bash
+     kubectl get pods --selector env=dev
+     kubectl get pods --selector env=dev --no-headers | wc -l
+     ```
+
+     </details>
+
+2. <details>
+    <summary>How many PODs are in the finance business unit (bu)?</summary>
+  
+     ```bash
+     kubectl get pods --selector bu=finance --no-headers | wc -l
+     ```
+
+     </details>
+
+3. <details>
+    <summary>How many objects are in the prod environment including PODs, ReplicaSets and any other objects?</summary>
+  
+     ```bash
+     kubectl get all --selector env=prod --no-headers | wc -l
+     ```
+
+     </details>
+
+4. <details>
+    <summary>Identify the POD which is part of the prod environment, the finance BU and of frontend tier?</summary>
+  
+     ```bash
+     kubectl get all --selector env=prod,bu=finance,tier=frontend
+     ```
+
+     </details>
+
+5. <details>
+    <summary>A ReplicaSet definition file is given replicaset-definition-1.yaml. Try to create the replicaset. There is an issue with the file. Try to fix it.</summary>
+  
+     ```bash
+     vi replicaset-definition-1.yaml
+     kubectl create -f replicaset-definition-1.yaml
+     kubectl get rs 
+     ```
+
+     </details>
+
+# Practice Test - Taints and Tolerations
+1. <details>
+    <summary>How many nodes exist on the system?Including the controlplane node.</summary>
+  
+     ```bash
+     kubectl get nodes
+     ```
+
+     </details>
+
+2. <details>
+    <summary>Do any taints exist on node01 node?</summary>
+  
+     ```bash
+     kubectl describe node node01 | grep Taint
+     ```
+
+     </details>
+
+3. <details>
+    <summary>Create a taint on node01 with key of spray, value of mortein and effect of NoSchedule</summary>
+  
+     ```bash
+     kubectl taint nodes node01 spray=mortein:NoSchedule
+     ```
+
+     </details>
+
+> N
+4. <details>
+    <summary>Create a new pod with the nginx image and pod name as mosquito.</summary>
+  
+     ```bash
+     kubectl run mosquito --image=nginx 
+     kubectl get pods 
+     ```
+
+     </details>
+
+5. <details>
+    <summary>What is the state of the POD?</summary>
+  
+     ```bash
+     kubectl get pods 
+     ```
+
+     </details>
+
+6. <details>
+    <summary>Why do you think the pod is in a pending state?</summary>
+  
+     ```bash
+     kubectl describe pods 
+     ```
+
+     </details>
+
+> HH
+7. <details>
+    <summary>Create another pod named bee with the nginx image, which has a toleration set to the taint mortein.</summary>
+  
+     ```bash
+     kubectl run bee --image=nginx --dry-run=client -o yaml
+     kubectl run bee --image=nginx --dry-run=client -o yaml > bee.yaml
+     vi bee.yaml # tolerations : ~
+     kubectl create -f bee.yaml
+     kubectl get pods --watch
+     ```
+
+     </details>
+
+9. <details>
+    <summary>Do you see any taints on controlplane node?</summary>
+  
+     ```bash
+     kubectl describe node controlplane | grep Taint
+     ```
+
+     </details>
+
+> H
+10. <details>
+    <summary>Remove the taint on controlplane, which currently has the taint effect of NoSchedule.</summary>
+  
+     ```bash
+     # kubectl taint nodes controlplane node-role.kubernetes.io/master:NoSchedule-
+     kubectl taint nodes controlplane node-role.kubernetes.io/control-plane:NoSchedule-
+     kubectl describe node controlplane
+     ```
+
+     </details>
+
+11. <details>
+    <summary>What is the state of the pod mosquito now?</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+12. <details>
+    <summary>Which node is the POD mosquito on now?</summary>
+  
+     ```bash
+     kubectl get pods -o wide
      ```
 
      </details>
