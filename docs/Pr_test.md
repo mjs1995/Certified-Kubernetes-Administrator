@@ -8,6 +8,10 @@
 [Day5-Manual Scheduling](#practice-test---manual-scheduling)<br>
 [Day5-Labels and Selectors](#practice-test---labels-and-selectors)<br>
 [Day5-Taints and Tolerations](#practice-test---taints-and-tolerations)<br>
+[Day6-Node Affinity](#practice-test---node-affinity)<br>
+[Day6-Resource Limits](#practice-test---resource-limits)<br>
+[Day6-DaemonSets](#practice-test---daemonsets)<br>
+[Day6-Static Pods](#practice-test---static-pods)<br>
 
 # Practice Test - PODs
 1. <details>
@@ -842,6 +846,308 @@
   
      ```bash
      kubectl get pods -o wide
+     ```
+
+     </details>
+
+# Practice Test - Node Affinity
+1. <details>
+    <summary>How many Labels exist on node node01?</summary>
+  
+     ```bash
+     kubectl describe node node01
+     ```
+
+     </details>
+
+2. <details>
+    <summary>What is the value set to the label key beta.kubernetes.io/arch on node01?</summary>
+  
+     ```bash
+     kubectl describe node node01
+     ```
+
+     </details>
+
+3. <details>
+    <summary>Apply a label color=blue to node node01</summary>
+  
+     ```bash
+     kubectl label node node01 color=blue
+     ```
+
+     </details>
+
+4. <details>
+    <summary>Create a new deployment named blue with the nginx image and 3 replicas.</summary>
+  
+     ```bash
+     kubectl create deployment blue --image=nginx
+     kubectl scale deployment blue --replicas=3
+     # kubectl create deployment blue --image=nginx --replicas=3
+     ```
+
+     </details>
+
+5. <details>
+    <summary>Which nodes can the pods for the blue deployment be placed on?</summary>
+  
+     ```bash
+     kubectl describe nodes|grep -i Taints
+     kubectl get pods -o wide
+     ```
+
+     </details>
+
+> H
+6. <details>
+    <summary>Set Node Affinity to the deployment to place the pods on node01 only.</summary>
+  
+     ```bash
+     # https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/
+     kubectl edit deployment blue # ctrl + v -> esc -> shift + . 
+     ```
+
+     </details>
+
+7. <details>
+    <summary>Which nodes are the pods placed on now?</summary>
+  
+     ```bash
+     kubectl get pods -o wide
+     ```
+
+     </details>
+
+> H
+8. <details>
+    <summary>Create a new deployment named red with the nginx image and 2 replicas, and ensure it gets placed on the controlplane node only.Use the label key - node-role.kubernetes.io/control-plane - which is already set on the controlplane node.</summary>
+  
+     ```bash
+     kubectl describe node controlplane
+     kubectl create deployment red --image=nginx --replicas=2 --dry-run=client -o yaml
+     kubectl create deployment red --image=nginx --replicas=2 --dry-run=client -o yaml > red.yaml
+     vi red.yaml
+     # https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes-using-node-affinity/ - operator: Exists
+     kubectl create -f red.yaml
+     ```
+
+     </details>
+
+# Practice Test - Resource Limits
+1. <details>
+    <summary>A pod called rabbit is deployed. Identify the CPU requirements set on the Pod</summary>
+  
+     ```bash
+     kubectl describe pod rabbit
+     ```
+
+     </details>
+
+2. <details>
+    <summary>Delete the rabbit Pod.Once deleted, wait for the pod to fully terminate.</summary>
+  
+     ```bash
+     kubectl delete pod rabbit
+     ```
+
+     </details>
+
+3. <details>
+    <summary>Another pod called elephant has been deployed in the default namespace. It fails to get to a running state. Inspect this pod and identify the Reason why it is not running.</summary>
+  
+     ```bash
+     kubectl get pods
+     kubectl describe pod elephant
+     ```
+
+     </details>
+
+5. <details>
+    <summary>The elephant pod runs a process that consumes 15Mi of memory. Increase the limit of the elephant pod to 20Mi.</summary>
+  
+     ```bash
+     kubectl get pods elephant -o yaml > elephant.yaml
+     vi elephant.yaml
+     kubectl delete pod elephant
+     kubectl create -f elephant.yaml
+     kubectl get pods
+     ```
+
+     </details>
+
+7. <details>
+    <summary>Delete the elephant Pod.</summary>
+  
+     ```bash
+     kubectl delete pod elephant
+     ```
+
+     </details>
+
+# Practice Test - DaemonSets
+1. <details>
+    <summary>How many DaemonSets are created in the cluster in all namespaces?</summary>
+  
+     ```bash
+     kubectl get daemonsets --all-namespaces
+     kubectl get daemonsets --A
+     ```
+
+     </details>
+
+2. <details>
+    <summary>Which namespace are the DaemonSets created in?</summary>
+  
+     ```bash
+     kubectl get daemonsets --all-namespaces
+     ```
+
+     </details>
+
+3. <details>
+    <summary>Which of the below is a DaemonSet?</summary>
+  
+     ```bash
+     kubectl get all --all-namespaces
+     ```
+
+     </details>
+
+4. <details>
+    <summary>On how many nodes are the pods scheduled by the DaemonSet kube-proxy?</summary>
+  
+     ```bash
+     kubectl describe daemonset kube-proxy --namespace=kube-system
+     ```
+
+     </details>
+
+5. <details>
+    <summary>What is the image used by the POD deployed by the kube-flannel-ds DaemonSet?</summary>
+  
+     ```bash
+     kubectl get daemonsets --all-namespaces
+     kubectl describe ds kube-flannel-ds --namespace=kube-flannel
+     ```
+
+     </details>
+
+> H
+6. <details>
+    <summary>Deploy a DaemonSet for FluentD Logging.</summary>
+  
+     ```bash
+     kubectl create deployment elasticsearch -n kube-system --image=registry.k8s.io/fluentd-elasticsearch:1.20 --dry-run=client -o yaml          
+     kubectl create deployment elasticsearch -n kube-system --image=registry.k8s.io/fluentd-elasticsearch:1.20 --dry-run=client -o yaml > fluentd.yaml
+     vi fluentd.yaml
+     kubectl create -f fluentd.yaml
+     kubectl get ds -n kube-system
+     ```
+
+     </details>
+
+# Practice Test - Static Pods
+1. <details>
+    <summary>How many static pods exist in this cluster in all namespaces?</summary>
+  
+     ```bash
+     kubectl get pods --all-namespaces
+     ```
+
+     </details>
+
+2. <details>
+    <summary>Which of the below components is NOT deployed as a static pod?</summary>
+  
+     ```bash
+     kubectl get pods --all-namespaces
+     ```
+
+     </details>
+
+3. <details>
+    <summary>Which of the below components is NOT deployed as a static POD?</summary>
+  
+     ```bash
+     kubectl get pods --all-namespaces
+     ```
+
+     </details>
+
+4. <details>
+    <summary>On which nodes are the static pods created currently?</summary>
+  
+     ```bash
+     kubectl get pods --all-namespaces -o wide
+     ```
+
+     </details>
+
+5. <details>
+    <summary>On which nodes are the static pods created currently?</summary>
+  
+     ```bash
+     ps -aux | grep config.yaml
+     cat /var/lib/kubelet/config.yaml
+     ```
+
+     </details>
+
+6. <details>
+    <summary>How many pod definition files are present in the manifests folder?</summary>
+  
+     ```bash
+     ls /etc/kubernetes/manifests/   
+     ```
+
+7. <details>
+    <summary>What is the docker image used to deploy the kube-api server as a static pod?</summary>
+  
+     ```bash
+     cat /etc/kubernetes/manifests/kube-apiserver.yaml   
+     ```
+
+     </details>
+
+> H
+8. <details>
+    <summary>Create a static pod named static-busybox that uses the busybox image and the command sleep 1000</summary>
+  
+     ```bash
+     kubectl run --restart=Never --image=busybox static-busybox --dry-run=client -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
+     kubectl get pods
+     ```
+
+     </details>
+
+9. <details>
+    <summary>Create a static pod named static-busybox that uses the busybox image and the command sleep 1000</summary>
+  
+     ```bash
+     vi /etc/kubernetes/manifests/static-busybox.yaml
+     kubectl get pods --watch
+     # kubectl run --restart=Never --image=busybox:1.28.4 static-busybox--dry-run=client -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
+     ```
+
+     </details>
+
+> H
+10. <details>
+    <summary>We just created a new static pod named static-greenbox. Find it and delete it.</summary>
+  
+     ```bash
+     kubectl get pods -o wide
+     kubectl delete pods static-greenbox-node01
+     ls /etc/kubernetes/manifests/   
+     kubectl get nodes -o wide
+     ssh 10.24.105.9
+     cat /var/lib/kubelet/config.yaml # grep staticPodPath /var/lib/kubelet/config.yaml
+     cd /etc/just-to-mess-with-you # node01 $ rm -rf /etc/just-to-mess-with-you/greenbox.yaml
+     ls 
+     rm greenbox.yaml
+     exit
+     kubectl get pods --watch
      ```
 
      </details>
