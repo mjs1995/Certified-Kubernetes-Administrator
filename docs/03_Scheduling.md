@@ -1,5 +1,6 @@
 # study
 [Day5](#manual-scheduling)<br>
+[Day6](#node-affinity-vs-tains-and-tolerations)<br>
 
 # Manual Scheduling
 - ![image](https://user-images.githubusercontent.com/47103479/210774607-a4c5ef7f-bba5-43cc-969f-e609131549bb.png)
@@ -53,3 +54,55 @@
     - 스케줄러는 파드가 노드에 배치되도록 요구됨 
     - 사용 가능한 값이 무시됨으로 설정되어 파드가 계속 실행됨. 노드 선호도의 변경 사항이 예약되면 영향을 미치지 않음 
     - 실행단계에서 차이 존재. Required라는 옵션이 도입되면서 선호 규칙을 충족하지 않는 노드에서 실행중인 모든 파드를 제거함 
+
+# Node Affinity vs Tains and Tolerations
+- ![image](https://user-images.githubusercontent.com/47103479/211035775-cc99cfbe-bc1d-4a17-bc76-8e5228580eba.png)  
+  - 색에 맞춰 배치하고싶음. 먼저 taint 및 tolerations 적용.(색지정)
+  - 다른 노드에 배치될수있음 
+- ![image](https://user-images.githubusercontent.com/47103479/211035969-ce24c575-a06d-43f2-8926-41cc7df0b77b.png)
+  - 선호도는 각각의 색상으로 노드에 레이블을 지정하고 selector를 선택함 
+  - 다른 파드 중 하나가 다른 노드에서 끝날 수 있음 
+- 다른 파드가 노드에 배치되지 않도록 방지하기 위해 먼저 taint 및 tolerations 적용하고 Node Affinity를 사용하여 노드에 배치되지 않도록 파드를 방지함 
+
+# RESOURCE LIMITS
+- 사용 가능한 리소스가 충분하지 않은 경우 쿠버네티스는 파드 예약을 보류함 
+- 컨테이너 리소스 요청 : 기본적으로 쿠버네티스 파드 또는 컨테이너는 파드 내에 0.5CPU와 256Mi가 필요함
+- ![image](https://user-images.githubusercontent.com/47103479/211132870-e79ba31e-d740-42ca-adb0-ea4155005afc.png)
+- 1CPU - 1 AWS vCPU , 1 GCP Core, 1 Azure Core, 1 Hyperthread 
+- 기본적으로 쿠버네티스는 1vCPU와 512 Mi로 제한 
+  - ![image](https://user-images.githubusercontent.com/47103479/211133000-107aacea-b8b8-47b7-9284-130a1dba93c9.png)
+  - 설정으로 한도 제한을 할 수 있음. 이 제한을 초과하면 파드가 종료됨 
+- 파드 및 배포 편집
+  - > kubectl edit pod <pod name> - 파일의 복사본이 임시 위치에 저장됨
+  - > kubectl delete pod webapp - 기존 파일 삭제
+  - > kubectl create -f /tmp/kubectl-edit-ccvrq.yaml - 임시 파일을 사용하여 새 파드 생성 
+  - > kubectl get pod webapp -o yaml > my-new-pod.yaml - YAML 형식 파드 추출
+  - > vi my-new-pod.yaml - 파일 변경
+  - > kubectl delete pod webapp - 기존 파드 삭제
+  - > kubectl create -f my-new-pod.yaml 새 파드 생성 
+  - > kubectl edit deployment my-deployment - 배포 편집 
+
+# Daemon Sets
+- ![image](https://user-images.githubusercontent.com/47103479/211133721-3fd1705f-0936-4bdb-acc7-0a5906503f1d.png)
+  - ReplicasSet으로 여러 장의 사본을 만들었음. 데몬셋도 레플리카셋과 비슷하며 파드의 여러 인스턴스를 배포하는데 도움이 됨
+  - 클러스터 각 노드에서 파드의 복사본 하나를 실행함, 클러스터에 새 노드가 추가될 때마다 파드의 복제본이 해당 노드에 자동으로 추가 됨. 노드가 제거되면 파드도 자동으로 제거됨 
+  - 클러스터의 데몬셋으로 kube-proxy 구성 요소를 배포할 수 있음
+  - 클러스터 각 노드에서 vivenet과 같은 네트워킹 솔루션 에이전트를 배포할 수 있음 
+- ![image](https://user-images.githubusercontent.com/47103479/211133802-548da639-e0e2-4ae2-8274-03786854995e.png)
+  - > kubectl create –f daemon-set-definition.yaml
+  - > kubectl get daemonsets
+  - > kubectl describe daemonsets monitoring-daemon
+- v.1.12부터 데몬셋은 노드 선호도 규칙으로 기본 스케줄러를 사용하여 노드에서 파드를 예약함 
+
+# Static PODs
+- ![image](https://user-images.githubusercontent.com/47103479/211139023-92838181-a3f9-4a82-91a2-bea14460df2e.png)
+  - API 서버 또는 나머지의 개입 없이 kubelet이 자체적으로 생성한 파드는 쿠버네티스 클러스터 구성 요소 중 정적 파드라고 함 
+  - ![image](https://user-images.githubusercontent.com/47103479/211139106-6018a81a-7578-4b09-8e5a-03cf0b01762f.png)
+- > docker ps 
+  - 쿠버네티스 클러스터가 아직 없기 때문에 도커 명령어로 실행하여 볼 수 있음 
+- ![image](https://user-images.githubusercontent.com/47103479/211139354-24359851-f5ef-49d9-af58-b639bf4a38b8.png)
+  - 바이너리를 다운로드 할 필요가 없고 서비스를 구성하거나 서비스 충돌에 대해 걱정할 필요가 없음. 서비스 중 하나라도 중단되면 정적 포드이므로 다시 시작하면됨 
+- 데몬세트와의 차이
+  - ![image](https://user-images.githubusercontent.com/47103479/211139362-f228bae5-2755-4428-8bda-4d34b995f98f.png)
+  - 데몬세트 - kube api 서버를 통해 데몬 세트 컨트롤러에 의해 클러스터의 모든 노드에서 사용할 수 있음. 응용프로그램이 한 인스턴스를 보장하는데 사용됨   
+  - 정적 파드 - kueb API 서버의 간섭없이 kubelet에서 직접 생성. 나머지 쿠버네티스 컨트롤 플레인 구성 요소. 
