@@ -13,7 +13,8 @@
 [Day6-DaemonSets](#practice-test---daemonsets)<br>
 [Day6-Static Pods](#practice-test---static-pods)<br>
 
-# Practice Test - PODs
+# Core Concepts
+## Practice Test - PODs
 1. <details>
    <summary>How many pods exist on the system? In the current(default) namespace.</summary>
   
@@ -150,7 +151,7 @@
 
      </details>
 
-# Practice Test - ReplicaSets
+## Practice Test - ReplicaSets
 1. <details>
     <summary>How many PODs exist on the system? </summary>
   
@@ -309,7 +310,7 @@
 
      </details>
 
-# Practice Test - Deployments
+## Practice Test - Deployments
 1. <details>
     <summary>How many PODs exist on the system?</summary>
   
@@ -416,7 +417,7 @@
 
      </details>
 
-# Practice Test - Services
+## Practice Test - Services
 1. <details>
     <summary>How many Services exist on the system?</summary>
   
@@ -502,7 +503,7 @@
 
      </details>
 
-# Practice Test - Namespace
+## Practice Test - Namespace
 1. <details>
     <summary>How many Namespaces exist on the system?</summary>
   
@@ -562,7 +563,7 @@
 
      </details>
 
-# Practice Test - Imperative Commands
+## Practice Test - Imperative Commands
 2. <details>
     <summary>Deploy a pod named nginx-pod using the nginx:alpine image.</summary>
   
@@ -641,7 +642,8 @@
 
      </details>
 
-# Practice Test - Manual Scheduling
+# Scheduling
+## Practice Test - Manual Scheduling
 1. <details>
     <summary>A pod definition file nginx.yaml is given. Create a pod using the file.</summary>
   
@@ -691,7 +693,7 @@
 
      </details>
 
-# Practice Test - Labels and Selectors
+## Practice Test - Labels and Selectors
 1. <details>
     <summary>We have deployed a number of PODs. They are labelled with tier, env and bu. How many PODs exist in the dev environment (env)?</summary>
   
@@ -740,7 +742,7 @@
 
      </details>
 
-# Practice Test - Taints and Tolerations
+## Practice Test - Taints and Tolerations
 1. <details>
     <summary>How many nodes exist on the system?Including the controlplane node.</summary>
   
@@ -850,7 +852,7 @@
 
      </details>
 
-# Practice Test - Node Affinity
+## Practice Test - Node Affinity
 1. <details>
     <summary>How many Labels exist on node node01?</summary>
   
@@ -934,7 +936,7 @@
 
      </details>
 
-# Practice Test - Resource Limits
+## Practice Test - Resource Limits
 1. <details>
     <summary>A pod called rabbit is deployed. Identify the CPU requirements set on the Pod</summary>
   
@@ -985,7 +987,7 @@
 
      </details>
 
-# Practice Test - DaemonSets
+## Practice Test - DaemonSets
 1. <details>
     <summary>How many DaemonSets are created in the cluster in all namespaces?</summary>
   
@@ -1047,7 +1049,7 @@
 
      </details>
 
-# Practice Test - Static Pods
+## Practice Test - Static Pods
 1. <details>
     <summary>How many static pods exist in this cluster in all namespaces?</summary>
   
@@ -1148,6 +1150,278 @@
      rm greenbox.yaml
      exit
      kubectl get pods --watch
+     ```
+
+     </details>
+
+## Practice Test - Multiple Schedulers
+1. <details>
+    <summary>What is the name of the POD that deploys the default kubernetes scheduler in this environment?</summary>
+  
+     ```bash
+     kubectl get pods --namespace=kube-system
+     ```
+
+     </details>
+
+2. <details>
+    <summary>What is the image used to deploy the kubernetes scheduler?</summary>
+  
+     ```bash
+     kubectl describe pod kube-scheduler-controlplane --namespace=kube-system
+     ```
+
+     </details>
+
+3. <details>
+    <summary>We have already created the ServiceAccount and ClusterRoleBinding that our custom scheduler will make use of</summary>
+  
+     ```bash
+     # kubectl describe pod kube-scheduler-controlplane --namespace=kube-system
+     kubectl get sa my-scheduler -n kube-system
+     ```
+
+     </details>
+
+4. <details>
+    <summary>Let's create a configmap that the new scheduler will employ using the concept of ConfigMap as a volume.</summary>
+  
+     ```bash
+     kubectl create configmap my-scheduler-config --from-file=/root/my-scheduler-config.yaml -n kube-system
+     kubectl get configmap my-scheduler-config -n kube-system
+
+     ```
+
+     </details>
+
+5. <details>
+    <summary>Deploy an additional scheduler to the cluster following the given specification.</summary>
+  
+     ```bash
+     kubectl describe pod kube-scheduler-controlplane --namespace=kube-system | grep Image # registry.k8s.io/kube-scheduler:v1.26.0
+     vi my-scheduler.yaml
+     kubectl create -f my-scheduler.yaml
+     kubectl get pods -n kube-system
+     ```
+
+     </details>
+
+6. <details>
+    <summary>A POD definition file is given. Use it to create a POD with the new custom scheduler.</summary>
+  
+     ```bash
+     vi nginx-pod.yaml # spec > schedulerName : my-scheduler
+     kubectl create -f nginx-pod.yaml
+     ```
+
+     </details>
+
+# Logging & Monitoring
+## Practice Test - Monitor Cluster Components
+1. <details>
+    <summary>We have deployed a few PODs running workloads. Inspect them.</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+2. <details>
+    <summary>Let us deploy metrics-server to monitor the PODs and Nodes. Pull the git repository for the deployment files.</summary>
+  
+     ```bash
+     git clone https://github.com/kodekloudhub/kubernetes-metrics-server.git
+     ```
+
+     </details>
+
+3. <details>
+    <summary>Deploy the metrics-server by creating all the components downloaded.</summary>
+  
+     ```bash
+     cd kubernetes-metrics-server
+     kubectl create -f .
+     ```
+
+     </details>
+
+4. <details>
+    <summary>It takes a few minutes for the metrics server to start gathering data.</summary>
+  
+     ```bash
+     kubectl top node
+     ```
+
+     </details>
+
+5. <details>
+    <summary>Identify the node that consumes the most CPU.</summary>
+  
+     ```bash
+     kubectl top node
+     ```
+
+     </details>
+
+6. <details>
+    <summary>Identify the node that consumes the most Memory.</summary>
+  
+     ```bash
+     kubectl top node
+     ```
+
+     </details>
+
+7. <details>
+    <summary>Identify the POD that consumes the most Memory.</summary>
+  
+     ```bash
+     kubectl top pod
+     ```
+
+     </details>
+
+8. <details>
+    <summary>Identify the POD that consumes the least CPU.</summary>
+  
+     ```bash
+     kubectl top pod
+     ```
+
+     </details>
+
+## Practice Test - Application Logs
+1. <details>
+    <summary>We have deployed a POD hosting an application. Inspect it. Wait for it to start.</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+2. <details>
+    <summary>A user - USER5 - has expressed concerns accessing the application. Identify the cause of the issue.</summary>
+  
+     ```bash
+     kubectl logs webapp-1
+     ```
+
+     </details>
+
+3. <details>
+    <summary>We have deployed a new POD - webapp-2 - hosting an application. Inspect it. Wait for it to start.</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+4. <details>
+    <summary>A user is reporting issues while trying to purchase an item. Identify the user and the cause of the issue.</summary>
+  
+     ```bash
+     kubectl logs webapp-2
+     ```
+
+     </details>
+
+# Practice Test - Rolling Updates and Rollback
+1. <details>
+    <summary>We have deployed a simple web application. Inspect the PODs and the Services</summary>
+  
+     ```bash
+     kubectl get pods
+     kubectl get services
+     ```
+
+     </details>
+
+3. <details>
+    <summary>Run the script named curl-test.sh to send multiple requests to test the web application. Take a note of the output.</summary>
+  
+     ```bash
+     kubectl describe deployment
+     ./curl-test.sh
+     ```
+
+     </details>
+
+> N
+4. <details>
+    <summary>Inspect the deployment and identify the number of PODs deployed by it </summary>
+  
+     ```bash
+     kubectl describe deployment
+     k get deploy
+     ```
+
+     </details>
+
+5. <details>
+    <summary>What container image is used to deploy the applications?</summary>
+  
+     ```bash
+     kubectl describe deployment frontend
+     ```
+
+     </details>
+
+6. <details>
+    <summary>Inspect the deployment and identify the current strategy</summary>
+  
+     ```bash
+     kubectl describe deployment frontend
+     ```
+
+     </details>
+
+7. <details>
+    <summary>If you were to upgrade the application now what would happen?</summary>
+  
+     ```bash
+     kubectl describe deployment frontend
+     ```
+
+     </details>
+
+8. <details>
+    <summary>Let us try that. Upgrade the application by setting the image on the deployment to kodekloud/webapp-color:v2</summary>
+  
+     ```bash
+     # kubectl edit deployment frontend
+     kubectl describe deployment frontend
+     k set image deploy frontend simple-webapp=kodekloud/webapp-color:v2
+     ```
+
+     </details>
+
+10. <details>
+    <summary>Up to how many PODs can be down for upgrade at a time</summary>
+  
+     ```bash
+     k describe deployment frontend
+     ```
+
+     </details>
+
+11. <details>
+    <summary>Change the deployment strategy to Recreate</summary>
+  
+     ```bash
+     k edit deployment frontend
+     k describe deployment frontend
+     ```
+
+     </details>
+
+12. <details>
+    <summary>Upgrade the application by setting the image on the deployment to kodekloud/webapp-color:v3</summary>
+  
+     ```bash
+     k set image deploy frontend simple-webapp=kodekloud/webapp-color:v3
      ```
 
      </details>
