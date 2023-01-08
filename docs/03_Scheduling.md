@@ -106,3 +106,19 @@
   - ![image](https://user-images.githubusercontent.com/47103479/211139362-f228bae5-2755-4428-8bda-4d34b995f98f.png)
   - 데몬세트 - kube api 서버를 통해 데몬 세트 컨트롤러에 의해 클러스터의 모든 노드에서 사용할 수 있음. 응용프로그램이 한 인스턴스를 보장하는데 사용됨   
   - 정적 파드 - kueb API 서버의 간섭없이 kubelet에서 직접 생성. 나머지 쿠버네티스 컨트롤 플레인 구성 요소. 
+
+# Multiple Schedulers 
+- > wget https://storage.googleapis.com/kubernetes-release/release/v1.12.0/bin/linux/amd64/kube-scheduler
+- 각각의 스케줄러는 이름을 설정해야함 
+- 스케줄러를 파드로 배포하는 경우 파드 정의 파일을 생성해야함 
+- leaderElection옵션 설정. 실행중인 스케줄러 사본이 여러개인 경우 서로 다른 마스터 노드에서 고가용성 설정으로 여러 마스터 노드가 있는 경우 리더를 선택함에 있어 스케줄링 활동을 이끔 
+- > kubectl get events -o wide : 어떤 스케줄러가 특정 파드를 예약했는지 확인 가능 
+- > kubectl logs my-custom-scheduler --name-space=kube-system : 스케줄러의 로그 확인 
+
+# Scheduler Profile
+- Scheduling Queue(PrioritySort) - Filtering(NodeResourceFit / NodeName / NodeUnschedulable) - Scoring(NodeResourceFit / ImageLocality) - Binding(DefaultBinder) 
+  - 파드가 생성되면 파드는 스케줄링 대기열에서 파드가 예약되기를 정렬되고 기다림(우선순위 기반). 우선 순위 클래스를 생성하고 이름을 설정하고 우선 순위 값을 설정함 
+  - 그 후 필터 단계에서 파드를 실행할 수 없는 노드는 필터링됨(리소스가 충분한 노드를 식별함)
+  - Scoring단계에서는 스케줄러 점수를 각 노드에 연결함 
+  - Binding 단계는 파드가 최종적으로 노드에 바인딩되는 위치 
+  - pre/post 옵션도 존재함(필터링, 스코어링, 바인딩) 
