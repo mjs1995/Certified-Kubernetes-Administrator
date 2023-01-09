@@ -12,6 +12,10 @@
 [Day6-Resource Limits](#practice-test---resource-limits)<br>
 [Day6-DaemonSets](#practice-test---daemonsets)<br>
 [Day6-Static Pods](#practice-test---static-pods)<br>
+[Day7-Multiple Schedulers](#practice-test---multiple-schedulers)<br>
+[Day7-Monitor Cluster Components](#practice-test---monitor-cluster-components)<br>
+[Day7-Monitor Application Logs](#practice-test---application-logs)<br>
+[Day7-Rolling Updates and Rollback](#practice-test---rolling-updates-and-rollback)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -1422,6 +1426,183 @@
   
      ```bash
      k set image deploy frontend simple-webapp=kodekloud/webapp-color:v3
+     ```
+
+     </details>
+
+# Application Lifecycle Management
+## Practice Test - Commands and Arguments
+1. <details>
+    <summary>How many PODs exist on the system?</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+2. <details>
+    <summary>What is the command used to run the pod ubuntu-sleeper?</summary>
+  
+     ```bash
+     kubectl describe pod
+     # kubectl describe pod ubuntu-sleeper 
+     ```
+
+     </details>
+
+3. <details>
+    <summary>Create a pod with the ubuntu image to run a container to sleep for 5000 seconds. Modify the file ubuntu-sleeper-2.yaml.</summary>
+  
+     ```bash
+     vi ubuntu-sleeper-2.yaml #  command : ["sleep"] args: ["5000"]
+     kubectl create -f ubuntu-sleeper-2.yaml
+     ```
+
+     </details>
+
+4. <details>
+    <summary>Create a pod using the file named ubuntu-sleeper-3.yaml. There is something wrong with it. Try to fix it!</summary>
+  
+     ```bash
+     vi ubuntu-sleeper-3.yaml #  "1200" 
+     kubectl create -f ubuntu-sleeper-3.yaml
+     ```
+
+     </details>
+
+> N
+5. <details>
+    <summary>Update pod ubuntu-sleeper-3 to sleep for 2000 seconds.</summary>
+  
+     ```bash
+     kubectl edit pod ubuntu-sleeper-3 # "/tmp/kubectl-edit-793660717.yaml
+     kubectl replace --force -f /tmp/kubectl-edit-793660717.yaml
+     ```
+
+     </details>
+
+6. <details>
+    <summary>Inspect the file Dockerfile given at /root/webapp-color directory. What command is run at container startup?.</summary>
+  
+     ```bash
+     cat /root/webapp-color/Dockerfile
+     ```
+
+     </details>
+
+7. <details>
+    <summary>Inspect the file Dockerfile2 given at /root/webapp-color directory. What command is run at container startup?</summary>
+  
+     ```bash
+     cat /root/webapp-color/Dockerfile2
+     ```
+
+     </details>
+
+8. <details>
+    <summary>Inspect the two files under directory webapp-color-2. What command is run at container startup?</summary>
+  
+     ```bash
+     cat webapp-color-2/webapp-color-pod.yaml
+     ```
+
+     </details>
+
+9. <details>
+    <summary>Inspect the two files under directory webapp-color-3. What command is run at container startup?</summary>
+  
+     ```bash
+     cat webapp-color-3/webapp-color-pod-2.yaml
+     ```
+
+     </details>
+
+> H
+10. <details>
+    <summary>Create a pod with the given specifications. By default it displays a blue background. Set the given command line arguments to change it to green.</summary>
+  
+     ```bash
+     # kubectl run --help
+     kubectl run webapp-green --image=kodekloud/webapp-color -- --color green
+     ```
+
+     </details>
+
+## Practice Test - Env Variables
+1. <details>
+    <summary>How many PODs exist on the system?</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+2. <details>
+    <summary>What is the environment variable name set on the container in the pod?</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+3. <details>
+    <summary>What is the value set on the environment variable APP_COLOR on the container in the pod?</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+5. <details>
+    <summary>Update the environment variable on the POD to display a green background</summary>
+  
+     ```bash
+     kubectl edit pod webapp-color # /tmp/kubectl-edit-56807185.yaml
+     kubectl replace --force -f /tmp/kubectl-edit-56807185.yaml
+     ```
+
+     </details>
+
+7. <details>
+    <summary>How many ConfigMaps exists in the default namespace?</summary>
+  
+     ```bash
+     # k get configmap
+     kubectl get configmaps
+     ```
+
+     </details>
+
+8. <details>
+    <summary>Identify the database host from the config map db-config</summary>
+  
+     ```bash
+     kubectl describe configmaps
+     ```
+
+     </details>
+
+9. <details>
+    <summary>Create a new ConfigMap for the webapp-color POD. Use the spec given below.</summary>
+  
+     ```bash
+     kubectl create configmap webapp-config-map --from-literal=APP_COLOR=darkblue
+     k describe cm webapp-config-map
+     ```
+
+     </details>
+
+10. <details>
+    <summary>Update the environment variable on the POD to use the newly created ConfigMap</summary>
+  
+     ```bash
+     kubectl edit pod webapp-color
+     kubectl replace --force -f /tmp/kubectl-edit-599532790.yaml
+     k describe pod webapp-color
      ```
 
      </details>
