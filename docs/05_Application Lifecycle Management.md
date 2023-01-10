@@ -1,5 +1,6 @@
 # study 
-- [Day7-Rolling Updates and Rollback](#practice-test---rolling-updates-and-rollback)<br>
+- [Day7-Rolling Updates and Rollback](#rolling-updates-and-rollback)<br>
+- [Day8-Application Commands & Arguments](#application-commands-and-arguments)<br>
 
 # Rolling Updates and Rollback
 - ![image](https://user-images.githubusercontent.com/47103479/211197869-a9277a32-22ae-4269-9cbc-78446c94de02.png)
@@ -31,7 +32,7 @@
   - Rollback
     - > kubectl rollout undo deployment/myapp-deployment
 
-# Application Commands & Arguments
+# Application Commands and Arguments
 - 가상 머신과 달리 컨테이너는 운영 체제를 호스트하기 위한 것이 아니라 특정 작업을 실행하기 위한 것 
 - 도커 컨테이너 실행
   - > docker run ubuntu : ubuntu 이미지의 인스턴스를 실행함 
@@ -101,3 +102,62 @@
   - 비밀은 해당 노드의 포드에 필요한 경우에만 노드로 전송됨
   - Kubelet은 비밀이 디스크 저장소에 기록되지 않도록 비밀을 tmpfs에 저장함
   - 비밀에 의존하는 Pod가 삭제되면 kubelet은 비밀 데이터의 로컬 복사본도 삭제함 
+
+## Encrypting Secret Data at Rest
+- ![image](https://user-images.githubusercontent.com/47103479/211552103-223339fa-b6a8-4fca-a778-a8d0cd04026a.png)
+```shell
+kubectl create secret generic my-secret --from-literal=key=supersecret 
+k get secret 
+k describe secret my-secret 
+k get secret my-secret -o yaml 
+echo "{key}" | base64 --decode 
+apt-get install etcd-client 
+kubectl get pods -n kube-system
+k get secrets 
+# [https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/)
+# 데이터는 암호화되지 않은 형식으로 etcd에 저장됨. etcd에 액세스할 수 있는 사람은 누꾸나 확인가능 
+ETCDCTL_API=3 etcdctl --endpoints 10.2.0.9:2379 \
+  --cert=/etc/kubernetes/pki/etcd/server.crt \
+  --key=/etc/kubernetes/pki/etcd/server.key \
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+  get /registry/secrets/default/my-secret | hexdump -C
+
+ps -aux| grep kube-api | grep "encryption-provider-config"
+ls /etc/kubernetes/manifests/ 
+vi /etc/kubernetes/manifests/kube-apiserver.yaml
+
+head -c 32 /dev/urandom | base64 # 해당 코드를 yaml에 aescbc keys secret에 적용
+vi enc.yaml
+mkdir /etc/kubernetes/enc
+mv enc.yaml /etc/kubernetes/enc
+ls /etc/kubernetes/enc
+vi /etc/kubernetes/manifests/kube-apiserver.yaml # -encryption-provider-config=/etc/kubernetes/enc/enc.yaml 암호화 구성 파일의 위치 알려줌 
+kubectl get pods 
+crictl pods 
+ps aux | grep kube-api | grep encry 
+
+kubectl create secret generic my-secret-2 --from-literal=key2=topsecret
+k get secret 
+# 암호화가 활성화된것을 확인할 수 있음 
+ETCDCTL_API=3 etcdctl --endpoints 10.2.0.9:2379 \
+  --cert=/etc/kubernetes/pki/etcd/server.crt \
+  --key=/etc/kubernetes/pki/etcd/server.key \
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+  get /registry/secrets/default/my-secret2 | hexdump -C
+
+kubectl get secrets --all-namespaces -o json | kubectl replace -f -
+```
+
+## Multi-Container Pods
+- 다중 컨테이너 파드가 있는 이유는 함께 확장 및 축소할 수 있는 쌍이 필요함 - ex_함께 페어링 되기 위해서는 웹 서버 인스턴스 당 하나의 에이전트 인스턴스가 필요함
+- ![image](https://user-images.githubusercontent.com/47103479/211555766-c0a81616-b98b-441a-9076-f743c38e1f84.png)
+  - 같은 네트워크 공간을 공유하고 서로를 로컬 호스트로 참조할 수 있음. 동일한 스토리지 볼륨에 액세스할 수 있음 
+  - ![image](https://user-images.githubusercontent.com/47103479/211555878-42bb90ff-2c06-40f4-abb2-c8a5e95c8822.png)
+- CKAD 다중 파드 디자인 패턴
+  - ![image](https://user-images.githubusercontent.com/47103479/211561282-0d4a8230-b3d6-419d-8757-37384fb4f840.png)
+
+## InitContainers
+- ![image](https://user-images.githubusercontent.com/47103479/211561605-9c2e4e95-ead6-437d-aa05-8a381b446b34.png)
+- POD가 처음 생성되면 initContainer가 실행되고 initContainer의 프로세스는 애플리케이션을 호스팅하는 실제 컨테이너가 시작되기 전에 완료될 때까지 실행되어야 함
+- initContainer 중 하나라도 완료되지 않으면 Kubernetes는 Init Container가 성공할 때까지 Pod를 반복해서 다시 시작함 
+- ![image](https://user-images.githubusercontent.com/47103479/211561839-51b3ea3e-4a55-4d14-bc94-ab8b1a530ffb.png)
