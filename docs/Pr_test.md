@@ -16,6 +16,8 @@
 [Day7-Monitor Cluster Components](#practice-test---monitor-cluster-components)<br>
 [Day7-Monitor Application Logs](#practice-test---application-logs)<br>
 [Day7-Rolling Updates and Rollback](#practice-test---rolling-updates-and-rollback)<br>
+[Day8-Commands and Arguments](#practice-test---commands-and-arguments)<br>
+[Day8-Env Variables](#practice-test---env-variables)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -1606,3 +1608,217 @@
      ```
 
      </details>
+
+## Practice Test - Secrets
+1. <details>
+    <summary>How many Secrets exist on the system?</summary>
+  
+     ```bash
+     kubectl get secrets
+     ```
+
+     </details>
+
+2. <details>
+    <summary>How many secrets are defined in the dashboard-token secret?</summary>
+  
+     ```bash
+     kubectl get secrets
+     ```
+
+     </details>
+
+3. <details>
+    <summary>What is the type of the dashboard-token secret?</summary>
+  
+     ```bash
+     kubectl describe secret
+     ```
+
+     </details>
+
+4. <details>
+    <summary>Which of the following is not a secret data defined in dashboard-token secret?</summary>
+  
+     ```bash
+     kubectl describe secret
+     ```
+
+     </details>
+
+> N
+6. <details>
+    <summary>The reason the application is failed is because we have not created the secrets yet. Create a new secret named db-secret with the data given below.</summary>
+  
+     ```bash
+     k get deploy 
+     k get pods 
+     k get svc 
+     k get secret 
+     k create secret --help
+     kubectl create secret generic db-secret --from-literal=DB_Host=sql01 --from-literal=DB_User=root --from-literal=DB_Password=password123
+     k get secret 
+     ```
+
+     </details>
+
+7. <details>
+    <summary>The reason the application is failed is because we have not created the secrets yet. Create a new secret named db-secret with the data given below.</summary>
+  
+     ```bash
+     kubectl edit pod webapp-pod
+     kubectl replace --force -f /tmp/kubectl-edit-1138477144.yaml
+     ```
+
+     </details>
+
+## Practice Test - Multi-Container Pods
+1. <details>
+    <summary>Identify the number of containers created in the red pod.</summary>
+  
+     ```bash
+     kubectl get pods
+     ```
+
+     </details>
+
+2. <details>
+    <summary>Identify the name of the containers running in the blue pod.</summary>
+  
+     ```bash
+     kubectl describe pod blue
+     ```
+
+     </details>
+
+3. <details>
+    <summary>Create a multi-container pod with 2 containers.</summary>
+  
+     ```bash
+     k run yellow --image=busybox --dry-run=client -o yaml > yellow.yaml
+     vi yellow.yaml
+     k create -f yellow.yaml
+     ```
+
+     </details>
+
+6. <details>
+    <summary>Inspect the app pod and identify the number of containers in it.</summary>
+  
+     ```bash
+     k get pods -n elastic-stack
+     k describe pod app -n elastic-stack
+     ```
+
+     </details>
+
+> H
+7. <details>
+    <summary>The application outputs logs to the file /log/app.log. View the logs and try to identify the user having issues with Login.</summary>
+  
+     ```bash
+     k logs app -n elastic-stack
+     # kubectl -n elastic-stack exec -it app cat /log/app.log
+     ```
+
+     </details>
+
+8. <details>
+    <summary>Edit the pod to add a sidecar container to send logs to Elastic Search. Mount the log volume to the sidecar container.</summary>
+  
+     ```bash
+     k edit pod app -n elastic-stack 
+     kubectl replace --force -f /tmp/kubectl-edit-1380032120.yaml
+     ```
+
+     </details>
+
+## Practice Test - Init-Containers
+1. <details>
+    <summary>Identify the pod that has an initContainer configured.</summary>
+  
+     ```bash
+     kubectl get pods
+     kubectl describe pods
+     ```
+
+     </details>
+
+2. <details>
+    <summary>What is the image used by the initContainer on the blue pod?</summary>
+  
+     ```bash
+     kubectl describe pods
+     ```
+
+     </details>
+
+3. <details>
+    <summary>What is the state of the initContainer on pod blue?</summary>
+  
+     ```bash
+     kubectl describe pods
+     ```
+
+     </details>
+
+4. <details>
+    <summary>Why is the initContainer terminated? What is the reason?</summary>
+  
+     ```bash
+     kubectl describe pods
+     ```
+
+     </details>
+
+5. <details>
+    <summary>We just created a new app named purple. How many initContainers does it have?</summary>
+  
+     ```bash
+     kubectl describe pod purple
+     ```
+
+     </details>
+
+6. <details>
+    <summary>What is the state of the POD?</summary>
+  
+     ```bash
+     k get pods 
+     ```
+
+     </details>
+
+7. <details>
+    <summary>How long after the creation of the POD will the application come up and be available to users?</summary>
+  
+     ```bash
+     kubectl describe pod purple
+     ```
+
+     </details>
+
+8. <details>
+    <summary>Update the pod red to use an initContainer that uses the busybox image and sleeps for 20 seconds</summary>
+  
+     ```bash
+     k edit pod red 
+     k replace --force -f /tmp/kubectl-edit-1816006413.yaml
+     ```
+
+     </details>
+
+> N
+9. <details>
+    <summary>A new application orange is deployed. There is something wrong with it. Identify and fix the issue.</summary>
+  
+     ```bash
+     k describe pod orange
+     k logs orange
+     k logs orange -c init-myservice # {initcontainer 이름}
+     k edit pod orange 
+     k replace --force -f /tmp/kubectl-edit-119883445.yaml
+     ```
+
+     </details>
+
