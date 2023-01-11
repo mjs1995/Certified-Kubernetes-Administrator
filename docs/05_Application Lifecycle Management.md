@@ -1,6 +1,7 @@
 # study 
-- [Day7-Rolling Updates and Rollback](#rolling-updates-and-rollback)<br>
-- [Day8-Application Commands & Arguments](#application-commands-and-arguments)<br>
+- [Day7](#rolling-updates-and-rollback)<br>
+- [Day8](#application-commands-and-arguments)<br>
+- [Day9](#encrypting-secret-data-at-rest)<br>
 
 # Rolling Updates and Rollback
 - ![image](https://user-images.githubusercontent.com/47103479/211197869-a9277a32-22ae-4269-9cbc-78446c94de02.png)
