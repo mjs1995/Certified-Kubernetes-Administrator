@@ -18,6 +18,9 @@
 [Day7-Rolling Updates and Rollback](#practice-test---rolling-updates-and-rollback)<br>
 [Day8-Commands and Arguments](#practice-test---commands-and-arguments)<br>
 [Day8-Env Variables](#practice-test---env-variables)<br>
+[Day9-Secrets](#practice-test---secrets)<br>
+[Day9-Multi-Container Pods](#practice-test---multi-container-pods)<br>
+[Day9-Init-Containers](#practice-test---init-containers)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -1822,3 +1825,268 @@
 
      </details>
 
+# Cluster-Maintenance
+## Practice Test - OS Upgrades
+1. <details>
+    <summary>Let us explore the environment first. How many nodes do you see in the cluster?</summary>
+  
+     ```bash
+     # alias k=kubectl
+     kubectl get nodes
+     ```
+
+     </details>
+
+2. <details>
+    <summary>How many applications do you see hosted on the cluster?</summary>
+  
+     ```bash
+     kubectl get deploy
+     ```
+
+     </details>
+
+3. <details>
+    <summary>Which nodes are the applications hosted on?</summary>
+  
+     ```bash
+     kubectl get pods -o wide
+     ```
+
+     </details>
+
+4. <details>
+    <summary>We need to take node01 out for maintenance. Empty the node of all applications and mark it unschedulable.</summary>
+  
+     ```bash
+     k drain node01
+     k drain node01 --ignore-daemonsets
+     ```
+
+     </details>
+
+5. <details>
+    <summary>What nodes are the apps on now?</summary>
+  
+     ```bash
+     kubectl get pods -o wide 
+     ```
+
+     </details>
+
+6. <details>
+    <summary>The maintenance tasks have been completed. Configure the node node01 to be schedulable again.</summary>
+  
+     ```bash
+     kubectl uncordon node01
+     ```
+
+     </details>
+
+7. <details>
+    <summary>How many pods are scheduled on node01 now?</summary>
+  
+     ```bash
+     kubectl get pods -o wide
+     ```
+
+     </details>
+
+9. <details>
+    <summary>Why are the pods placed on the controlplane node?</summary>
+  
+     ```bash
+     kubectl describe node controlplane
+     ```
+
+     </details>
+
+11. <details>
+    <summary>We need to carry out a maintenance activity on node01 again. Try draining the node again using the same command as before: kubectl drain node01 --ignore-daemonsets</summary>
+  
+     ```bash
+     kubectl drain node01 --ignore-daemonsets
+     ```
+
+     </details>
+
+12. <details>
+    <summary>Why did the drain command fail on node01? It worked the first time!</summary>
+  
+     ```bash
+     kubectl drain node01 --ignore-daemonsets
+     ```
+
+     </details>
+
+13. <details>
+    <summary>What is the name of the POD hosted on node01 that is not part of a replicaset?</summary>
+  
+     ```bash
+     kubectl get pods -o wide
+     ```
+
+     </details>
+
+14. <details>
+    <summary>What would happen to hr-app if node01 is drained forcefully?</summary>
+  
+     ```bash
+     kubectl drain node02 --ignore-daemonsets --force 
+     ```
+
+     </details>
+
+16. <details>
+    <summary>hr-app is a critical app and we do not want it to be removed and we do not want to schedule any more pods on node01.</summary>
+  
+     ```bash
+     k cordon node01 
+     ```
+
+     </details>
+
+## Practice Test - Cluster Upgrade Process
+1. <details>
+    <summary>This lab tests your skills on upgrading a kubernetes cluster. We have a production cluster with applications running on it. Let us explore the setup first.</summary>
+  
+     ```bash
+     kubectl get nodes
+     ```
+
+     </details>
+
+2. <details>
+    <summary>How many nodes are part of this cluster?</summary>
+  
+     ```bash
+     kubectl get nodes
+     ```
+
+     </details>
+
+3. <details>
+    <summary>How many nodes can host workloads in this cluster?</summary>
+  
+     ```bash
+     k describe node | grep Taints
+     ```
+
+     </details>
+
+4. <details>
+    <summary>How many applications are hosted on the cluster?</summary>
+  
+     ```bash
+     kubectl get deploy
+     ```
+
+     </details>
+
+5. <details>
+    <summary>What nodes are the pods hosted on?</summary>
+  
+     ```bash
+     kubectl get pods -o wide
+     ```
+
+     </details>
+
+7. <details>
+    <summary>What is the latest stable version of Kubernetes as of today?</summary>
+  
+     ```bash
+     kubeadm upgrade plan
+     ```
+
+     </details>
+
+8. <details>
+    <summary>What is the latest version available for an upgrade with the current version of the kubeadm tool installed?</summary>
+  
+     ```bash
+     kubectl drain controlplane --ignore-daemonsets
+     k get nodes
+     ```
+
+     </details>
+
+> HHH
+9. <details>
+    <summary>Upgrade the controlplane components to exact version v1.26.0</summary>
+  
+     ```bash
+     cat /etc/*release*
+     apt update
+     apt-cache madison kubeadm
+     apt-get --version
+     apt-get update && apt-get install -y kubeadm=1.26.0-00
+     kubeadm upgrade plan
+     sudo kubeadm upgrade apply v1.26.0
+   
+     apt-get update && apt-get install -y kubelet=1.26.0-00 kubectl=1.26.0-00 && \
+     apt-mark hold kubelet kubectl
+
+     sudo systemctl daemon-reload
+     sudo systemctl restart kubelet
+     k get nodes 
+     ```
+
+     </details>
+
+11. <details>
+    <summary>Mark the controlplane node as "Schedulable" again</summary>
+  
+     ```bash
+     k uncordon controlplane
+     k get nodes 
+     ```
+
+     </details>
+
+12. <details>
+    <summary>Next is the worker node. Drain the worker node of the workloads and mark it UnSchedulable</summary>
+  
+     ```bash
+     k drain node01
+     ```
+
+     </details>
+
+> HHH
+13. <details>
+    <summary>Upgrade the worker node to the exact version v1.26.0</summary>
+  
+     ```bash
+     k get nodes
+     k get pods -o wide
+     k get nodes -o wide # internal ip 확인 
+     ssh 10.55.91.3
+   
+     apt-mark unhold kubeadm && \
+     apt-get update && apt-get install -y kubeadm=1.26.0-00 && \
+     apt-mark hold kubeadm
+   
+     sudo kubeadm upgrade node
+     
+     apt-mark unhold kubelet kubectl && \
+     apt-get update && apt-get install -y kubelet=1.26.0-00 kubectl=1.26.0-00 && \
+     apt-mark hold kubelet kubectl
+    
+     sudo systemctl daemon-reload
+     sudo systemctl restart kubelet
+     exit 
+     k get nodes 
+     ```
+
+     </details>
+
+14. <details>
+    <summary>Remove the restriction and mark the worker node as schedulable again.</summary>
+  
+     ```bash
+     k uncordon node01
+     k get nodes 
+     ```
+
+     </details>
