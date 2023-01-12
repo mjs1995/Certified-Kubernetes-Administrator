@@ -21,6 +21,8 @@
 [Day9-Secrets](#practice-test---secrets)<br>
 [Day9-Multi-Container Pods](#practice-test---multi-container-pods)<br>
 [Day9-Init-Containers](#practice-test---init-containers)<br>
+[Day10-OS Upgrades](#practice-test---os-upgrades)<br>
+[Day10-Cluster Upgrade Process](#practice-test---cluster-upgrade-process)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -2087,6 +2089,234 @@
      ```bash
      k uncordon node01
      k get nodes 
+     ```
+
+     </details>
+
+## Practice Test - Backup and Restore Methods
+1. <details>
+    <summary>How many deployments exist in the cluster?</summary>
+  
+     ```bash
+     kubectl get deployments
+     ```
+
+     </details>
+
+2. <details>
+    <summary>What is the version of ETCD running on the cluster?</summary>
+  
+     ```bash
+     kubectl describe pod -n kube-system etcd-controlplane
+     ```
+
+     </details>
+
+3. <details>
+    <summary>At what address can you reach the ETCD cluster from the controlplane node?</summary>
+  
+     ```bash
+     kubectl describe pod -n kube-system etcd-controlplane
+     ```
+
+     </details>
+
+4. <details>
+    <summary>Where is the ETCD server certificate file located?</summary>
+  
+     ```bash
+     kubectl describe pod -n kube-system etcd-controlplane
+     ```
+
+     </details>
+
+5. <details>
+    <summary>Where is the ETCD CA Certificate file located?</summary>
+  
+     ```bash
+     kubectl describe pod -n kube-system etcd-controlplane
+     ```
+
+     </details>
+
+> H
+6. <details>
+    <summary>Where is the ETCD CA Certificate file located?</summary>
+  
+     ```bash
+     # --listen-client-urls=https://127.0.0.1:2379,https://10.38.95.9:2379
+     # --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
+     # --cert-file=/etc/kubernetes/pki/etcd/server.crt
+     # --key-file=/etc/kubernetes/pki/etcd/server.key
+     # backup file at location
+     ETCDCTL_API=3 etcdctl snapshot save \
+     --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+     --cert=/etc/kubernetes/pki/etcd/server.crt \
+     --key=/etc/kubernetes/pki/etcd/server.key \
+     /opt/snapshot-pre-boot.db
+     ```
+
+     </details>
+
+8. <details>
+    <summary>Wake up! We have a conference call! After the reboot the master nodes came back online, but none of our applications are accessible. Check the status of the applications on the cluster. What's wrong?</summary>
+  
+     ```bash
+     k get deploy
+     k get pods
+     k get svc 
+     ```
+
+     </details>
+
+> H
+9. <details>
+    <summary>Luckily we took a backup. Restore the original state of the cluster using the backup file.</summary>
+  
+     ```bash
+     ETCDCTL_API=3 etcdctl snapshot restore \
+     --data-dir /var/lib/etcd-from-backup \
+     /opt/snapshot-pre-boot.db
+     
+     vi /etc/kubernetes/manifests/etcd.yaml # /var/lib/etcd-from-backup
+     kubectl get deployments
+     kubectl get services
+     ```
+
+     </details>
+
+## Practice Test - Backup and Restore Methods2
+2. <details>
+    <summary>Before proceeding to the next question, explore the student-node and the clusters it has access to.</summary>
+  
+     ```bash
+     kubectl config get-contexts
+     ```
+
+     </details>
+
+3. <details>
+    <summary>How many clusters are defined in the kubeconfig on the student-node?</summary>
+  
+     ```bash
+     kubectl config get-contexts
+     ```
+
+     </details>
+
+4. <details>
+    <summary>How many nodes (both controlplane and worker) are part of cluster1?</summary>
+  
+     ```bash
+     kubectl config use-context cluster1
+     kubectl get nodes
+     ```
+
+     </details>
+
+5. <details>
+    <summary>What is the name of the controlplane node in cluster2?</summary>
+  
+     ```bash
+     kubectl config use-context cluster2
+     kubectl get nodes
+     ```
+
+     </details>
+
+7. <details>
+    <summary>How is ETCD configured for cluster1?</summary>
+  
+     ```bash
+     kubectl config use-context cluster1
+     kubectl get pods -n kube-system # etcd-cluster1-controlplane - Stacked ETCD
+     ```
+
+     </details>
+
+8. <details>
+    <summary>How is ETCD configured for cluster2?</summary>
+  
+     ```bash
+     kubectl config use-context cluster2
+     kubectl get pods -n kube-system # etcd-cluster2-controlplane 없음 -> External ETCD
+     ```
+
+     </details>
+
+> N
+9. <details>
+    <summary>What is the IP address of the External ETCD datastore used in cluster2?</summary>
+  
+     ```bash
+     kubectl config use-context cluster2
+     kubectl get pods -n kube-system kube-apiserver-cluster2-controlplane -o yaml | grep etcd
+     ```
+
+     </details>
+
+10. <details>
+    <summary>What is the default data directory used the for ETCD datastore used in cluster1?</summary>
+  
+     ```bash
+     kubectl config use-context cluster1
+     kubectl get pods -n kube-system etcd-cluster1-controlplane -o yaml
+     ```
+
+     </details>
+
+> H
+12. <details>
+    <summary>What is the default data directory used the for ETCD datastore used in cluster2?</summary>
+  
+     ```bash
+     ssh etcd-server
+     systemctl list-unit-files | grep etcd
+     exit
+     ```
+
+     </details>
+
+> HH
+14. <details>
+    <summary>Take a backup of etcd on cluster1 and save it on the student-node at the path /opt/cluster1.db</summary>
+  
+     ```bash
+     ssh cluster1-controlplane
+     ETCDCTL_API=3 etcdctl snapshot save \
+     --cacert /etc/kubernetes/pki/etcd/ca.crt \
+     --cert /etc/kubernetes/pki/etcd/server.crt \
+     --key /etc/kubernetes/pki/etcd/server.key \
+     cluster1.db
+     
+     exit
+     scp cluster1-controlplane:~/cluster1.db /opt/
+     ```
+
+     </details>
+
+> HHH
+15. <details>
+    <summary>Take a backup of etcd on cluster1 and save it on the student-node at the path /opt/cluster1.db</summary>
+  
+     ```bash
+     scp /opt/cluster2.db etcd-server:~/ # Move the backup to the etcd-server node
+     ssh etcd-server # Log into etcd-server node
+     ls -ld /var/lib/etcd-data/
+     
+     # Do the restore
+     ETCDCTL_API=3 etcdctl snapshot restore \
+     --data-dir /var/lib/etcd-data-new \
+     cluster2.db
+
+     vi /etc/systemd/system/etcd.service
+
+     systemctl daemon-reload
+     systemctl restart etcd.service
+     exit
+     
+     kubectl config use-context cluster2
+     kubectl get all -n critical
      ```
 
      </details>
