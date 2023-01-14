@@ -52,4 +52,102 @@
 - 사용자 자격 증명을 사용하여 kube-api 서버에 인증할
   - > curl -v -k https://localhost:6443/api/v1/pods -u "user1:password123"
 
+# TLS Certificates
+- Symmetric Encryption
+  -  ![image](https://user-images.githubusercontent.com/47103479/212463495-4bf0ab2d-615e-4f96-9aa3-19f83c2582e4.png)
+  - 안전한 암호화 방식 
+  - 단일 키를 사용하여 데이터를 암호화하고 해독하는 대신 비대칭 암호화는 한 쌍의 키를 사용함 
+    - Private key, Public Lock
+  - 트릭은 데이터를 암호화거나 자물쇠로 잠그는 경우로 관련 키로만 열 수 있음 
+- ![image](https://user-images.githubusercontent.com/47103479/212463742-e0e33cfb-4644-475c-8c87-237054970d86.png) 
+  - > ssh-keygen : id_rsa(Private key), id_rsa.pub(Public lock) 생성 
+  - > cat ~/.ssh/authorized_keys 
+  - > ssh -i id_rsa_user@server1
+  - > openssl genrsa -out my-bank.key 1024 : 개인 키와 공개 키 쌍을 생성함 
+  - > openssl rsa -in my-bank.key -pubout > mybank.pem 
+- > openssl req -new -key my-bank.key -out my-bank.csr -subj "/c=US/ST=CA/O=MyOrg.Inc./CN=my-bank.com"
+- 네트워크를 통해 전송되고 있는 메시지를 암호화하려는 이유 
+  - 메시지를 암호화하기 위해 한 쌍의 공개 키와 개인 키로 비대칭 암호화를 사용함 
+  - 관리자는 한 쌍의 키를 사용하여 서버에 대한 SSH 연결을 보호함 
+  - 서버는 한 쌍의 키를 사용하여 STPS 트래픽을 보호함 
+    - 서버는 CA에 대한 인증서 서명 요청, 개인 키를 사용하여 CSR에 서명함(모든 사용자는 CA의 공개 키 사본을 가지고 있음) 
+    - 서명 된 인증서가 서버로 다시 전송되고 서버는 서명된 인증서와 함께 웹 애플리케이션을 구성함  
+  - 대칭 키는 서버의 공개키를 사용하여 암호화되고 다시 서버에 보내짐. 서버는 개인 키를 사용하여 메시지를 해독함  
+- ![image](https://user-images.githubusercontent.com/47103479/212464243-87d5feb9-902c-403c-84ae-1a8eb4304d31.png)
+- ![image](https://user-images.githubusercontent.com/47103479/212464220-2852c0d6-95f9-4e06-b29a-eeff28e9895e.png)
+
+# TLS in Kubernetes
+- 서비스 인증서 : 서버가 공개 및 개인 키를 사용하여 연결을 보호하는 방법 
+- ![image](https://user-images.githubusercontent.com/47103479/212471366-40ab88cc-f6c6-4b59-8b70-3b328a5a0455.png)
+  - 세 가지 유형의 인증서
+    - 서버에 구성된 서버 인증서
+    - CA 서버에 구성된 루트 인증서 
+    - 클라이언트에 구성된 클라이언트 인증서 
+  - 개인 키는 일반적으로 extension.key와 같이 있음. 파일 이름에 -키가 있음. server.key 또는 server-key.epm 
+- ![image](https://user-images.githubusercontent.com/47103479/212471375-0f54963f-1016-44a5-9ac4-e95903d60b72.png)
+  - 쿠버네티스 클러스터는 마스터 및 작업자 노드 세트로 구성됨 
+  - 노드 간의 모든 통신은 보안이 필요하고 암호화되어야 함 
+  - kubectl 유틸리티를 통한 Kubernetes 클러스터 또는 Kubernetes API에 직접 액세스하는 동안 보안 TLS 연결을 설정해야함 
+  - 클러스터 내에서 모든 다양한 서비스를 갖기 위해 두 가지 주요 요구 사항 
+    - 그들이 말하는 사람인지 확인하기 위해 서버 인증서 사용 및 모든 클라이언트가 클라이언트 인증서를 사용
+- Server Certificates for Servers
+  - ![image](https://user-images.githubusercontent.com/47103479/212471442-065b2b51-81a8-4dd6-a4aa-d0e78722c9c8.png)
+  - etcd 서버는 클러스터에 대한 모든 정보를 저장함. 따라서 한 쌍의 인증서와 키가 필요함
+  - 작업자 노드에 있는 kubelet 서비스는 HTTPS API 끝점을 노출함 
+- Client Certificates for Clients
+  - ![image](https://user-images.githubusercontent.com/47103479/212471591-7781a741-6ed9-42d2-b8f4-d73837cec222.png)
+  - kube-apiserver에 접속하는 클라이언트는 우리로 kubectl Arrest API를 통해 관리자
+  - 관리 사용자는 kube-API 서버에 인증하기 위한 키 쌍인 admin.crt 및 admin.key라고 하는 인증서가 필요함 
+- ![image](https://user-images.githubusercontent.com/47103479/212471642-1f2a70a3-5c27-4d30-88d3-e8cb0d6e0be7.png)
+- ![image](https://user-images.githubusercontent.com/47103479/212471630-c44b2dd5-f060-4dc2-bacd-00e76e00259e.png)
+
+# TLS in Kubernetes - Certificate Creation
+- 인증서를 생성하려면 Easy-RSA, OPENSSL, CFSSL와 같은 다양한 도구를 사용할 수 있음 
+- OPENSSL
+  - 개인 키 생성
+    - ![image](https://user-images.githubusercontent.com/47103479/212471738-bfa70d31-175d-4d82-8f2e-6dc54b517921.png)
+      - > openssl genrsa -out ca.key 2048 : Generate Keys
+      - > openssl req -new -key ca.key -subj "/CN=KUBERNETES-CA" -out ca.csr : Generate CSR
+      - > openssl x509 -req -in ca.csr -signkey ca.key -out ca.crt : Sign certificates
+  - 클라이언트 인증서 생성 
+    - ![image](https://user-images.githubusercontent.com/47103479/212471875-2bde0949-580f-4797-9caa-7ffd48624f12.png)
+      - > openssl genrsa -out admin.key 2048
+      - > openssl req -new -key admin.key -subj "/CN=kube-admin" -out admin.csr
+      - > openssl x509 -req -in admin.csr -CA ca.crt -CAkey ca.key -out admin.crt
+  - 생성 된 인증서를 통해서 관리자 인증서를 가져와서 클러스터를 관리할 수 있음 
+    - ![image](https://user-images.githubusercontent.com/47103479/212472032-55e1b6a0-2939-43e2-8907-3fdc289b82b3.png)
+    - > curl https://kube-apiserver:6443/api/v1/pods \ --key admin.key --cert admin.crt \ --cacert ca.crt
+- Generating Server Certificates
+  - ETCD Server certificate
+    - ![image](https://user-images.githubusercontent.com/47103479/212472123-3d80ba86-db49-42e5-a864-23a2412a0acd.png)
+    - ![image](https://user-images.githubusercontent.com/47103479/212472115-54e849f2-6310-417f-b650-48b75df6c94a.png)
+  - KUBE API SERVER
+    - ![image](https://user-images.githubusercontent.com/47103479/212472240-68ed13f8-cddb-4295-a0d1-fefe98f2a9be.png)
+    - > openssl genrsa -out apiserver.key 2048
+    - > openssl req -new -key apiserrver.key -subj \ "/CN=kube-apiserver" -out apiserver.csr
+    - > openssl req -new -key apiserver.key -subj \ "/CN=kube-apiserver" -out apiserver.csr –config openssl.cnf
+    - > openssl x509 -req -in apiserver.csr \ -CA ca.crt -CAkey ca.key -out apiserver.crt
+    - ![image](https://user-images.githubusercontent.com/47103479/212472269-d5ed205a-1a2f-4585-acd7-a3a3e33c591f.png)
+  - KUBECTL NODES (SERVER CERT)
+    - kubelets 서버는 각 노드에서 실행되는 노드 관리를 담당하는 ACTPS API 서버입니다.
+    - ![image](https://user-images.githubusercontent.com/47103479/212472321-6dd0eea0-c772-4913-b30c-c2ef6ff99218.png)
+  
+# View Certificate Details
+- ![image](https://user-images.githubusercontent.com/47103479/212474150-73db94f2-f193-46bc-ad07-3fa6c9dcb148.png)
+  - kubeadm에 의한 클러스터 프로비저닝에서 건강검진을 하기 위해서는 모든 인증서를 식별하여야 함 
+  - ![image](https://user-images.githubusercontent.com/47103479/212474211-0a559016-3db7-479f-bedf-b33454de73f2.png)
+  - > cat /etc/kubernetes/manifests/kube-apiserver.yaml
+    - ![image](https://user-images.githubusercontent.com/47103479/212474261-5fb0cfd3-8982-419f-a533-0aaec0d958e6.png)
+  - > openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout
+    - ![image](https://user-images.githubusercontent.com/47103479/212474278-bb31e767-eb9f-4ec6-8d96-61c34311b629.png)
+  - ![image](https://user-images.githubusercontent.com/47103479/212474319-e8a3a256-1201-4144-991f-10f48604d1ff.png)
+  - ![image](https://user-images.githubusercontent.com/47103479/212474340-68328e6c-ca89-45e4-812d-ef32987d8a01.png)
+- > journalctl -u etcd.service -l
+  - ![image](https://user-images.githubusercontent.com/47103479/212474356-f1b211b2-188e-4c79-9b7d-4af4f6dc7fff.png)
+- > kubectl logs etcd-master
+  - ![image](https://user-images.githubusercontent.com/47103479/212474387-80464bc2-eb74-4671-97da-5687ddb263d2.png)
+- > docker ps -a
+  - ![image](https://user-images.githubusercontent.com/47103479/212474400-37232e8e-8017-42d7-8073-38488cc391ac.png)
+  - > docker logs 87fc
+    - ![image](https://user-images.githubusercontent.com/47103479/212474422-02731c80-1a4b-4055-980d-774f16013661.png)
 
