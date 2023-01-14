@@ -2320,3 +2320,142 @@
      ```
 
      </details>
+
+# Security
+## Practice Test - View Certificates
+1. <details>
+    <summary>Identify the certificate file used for the kube-api server</summary>
+  
+     ```bash
+     cat /etc/kubernetes/manifests/kube-apiserver.yaml
+     ```
+
+     </details>
+
+2. <details>
+    <summary>Identify the Certificate file used to authenticate kube-apiserver as a client to ETCD Server</summary>
+  
+     ```bash
+     cat /etc/kubernetes/manifests/kube-apiserver.yaml
+     ```
+
+     </details>
+
+3. <details>
+    <summary>Identify the key used to authenticate kubeapi-server to the kubelet server</summary>
+  
+     ```bash
+     cat /etc/kubernetes/manifests/kube-apiserver.yaml
+     ```
+
+     </details>
+
+4. <details>
+    <summary>Identify the ETCD Server Certificate used to host ETCD server</summary>
+  
+     ```bash
+     cat /etc/kubernetes/manifests/kube-apiserver.yaml
+     cat /etc/kubernetes/manifests/etcd.yaml
+     ```
+
+     </details>
+
+5. <details>
+    <summary>Identify the ETCD Server CA Root Certificate used to serve ETCD Server</summary>
+  
+     ```bash
+     cat /etc/kubernetes/manifests/etcd.yaml
+     ```
+
+     </details>
+
+6. <details>
+    <summary>What is the Common Name (CN) configured on the Kube API Server Certificate?</summary>
+  
+     ```bash
+     openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout
+     ```
+
+     </details>
+
+7. <details>
+    <summary>What is the name of the CA who issued the Kube API Server Certificate?</summary>
+  
+     ```bash
+     openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout
+     ```
+
+     </details>
+
+8. <details>
+    <summary>Which of the below alternate names is not configured on the Kube API Server Certificate?</summary>
+  
+     ```bash
+     openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout
+     ```
+
+     </details>
+
+9. <details>
+    <summary>What is the Common Name (CN) configured on the ETCD Server certificate?</summary>
+  
+     ```bash
+     cat /etc/kubernetes/manifests/etcd.yaml
+     openssl x509 -in /etc/kubernetes/pki/etcd/server.crt -text -noout
+     ```
+
+     </details>
+
+10. <details>
+    <summary>What is the Common Name (CN) configured on the ETCD Server certificate?</summary>
+  
+     ```bash
+     openssl x509 -in /etc/kubernetes/pki/etcd/server.crt -text -noout
+     ```
+
+     </details>
+
+11. <details>
+    <summary>How long, from the issued date, is the Root CA Certificate valid for?</summary>
+  
+     ```bash
+     openssl x509 -in /etc/kubernetes/pki/ca.crt -text -noout
+     ```
+
+     </details>
+
+12. <details>
+    <summary>Kubectl suddenly stops responding to your commands. Check it out! Someone recently modified the /etc/kubernetes/manifests/etcd.yaml file</summary>
+  
+     ```bash
+     kubectl get pods 
+     # docker ps -a | grep kube-apiserver
+     # docker logs 
+     # docker ps -a | grep etcd 
+     cat /etc/kubernetes/manifests/etcd.yaml | grep server-certificate.crt
+     vi /etc/kubernetes/manifests/etcd.yaml
+     # docker ps -a | grep etcd 
+     # docker logs 
+     # kubectl get pods 
+     # docker ps -a | grep kube-api
+     ```
+
+     </details>
+
+> H
+13. <details>
+    <summary>The kube-api server stopped again! Check it out. Inspect the kube-api server logs and identify the root cause and fix the issue.</summary>
+  
+     ```bash
+     kubectl get nodes
+     crictl ps -a
+     crictl logs container-id dbb9d35b819b9 
+     cat /etc/kubernetes/manifests/kube-apiserver.yaml
+     cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep "\-\-etcd"
+     vi /etc/kubernetes/manifests/kube-apiserver.yaml
+     crictl ps -a
+     k get nodes 
+     ```
+   
+     </details>
+   
