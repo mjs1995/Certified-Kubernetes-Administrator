@@ -1,3 +1,6 @@
+# study
+- [Day11](#security-primitives)<br>
+
 # Security Primitives 
 - 비밀번호 기반 인증 비활성화, 경로 액세스 비활성화, SSH 키 기반 인증만 사용할 수 있음 
 - API 서버 자체에 대한 액세스 제어 
@@ -151,3 +154,101 @@
   - > docker logs 87fc
     - ![image](https://user-images.githubusercontent.com/47103479/212474422-02731c80-1a4b-4055-980d-774f16013661.png)
 
+# Certificates API
+- ![image](https://user-images.githubusercontent.com/47103479/212541766-afd3c6b4-3610-445b-8f16-6e56371b7ebd.png)
+  - 사용자가 증가하고 팀이 성장함에 따라 인증서를 관리하는 자동화 방법 필요
+  - API 호출을 통해 쿠버네티스에 직접 서명 요청. 쿠버네티스 API 객체 생성. 
+  - > openssl genrsa -out jane.key 2048 : 사용자 키 생성 
+  - > openssl req -new -key jane.key -subj "/CN=jane" -out jane.csr : 관리자에게 요청을 보냄 
+  - ![image](https://user-images.githubusercontent.com/47103479/212541844-823ab708-10dd-4158-8a6c-1810753bb7c8.png)
+    - > cat jane.csr | base64 
+  - > kubectl get csr : 모든 인증서 서명 요청을 볼 수 있음 
+  - > kubectl certificate approve jane : 인증 승인 명령 실행
+  - ![image](https://user-images.githubusercontent.com/47103479/212541980-19ec6f2d-5da1-4dab-8200-6901834402af.png)
+    - > kubectl get csr jane -o yaml : 인증서 보기
+    - > echo "<certificate>" |base64 --decode : 인증서 해독 
+- ![image](https://user-images.githubusercontent.com/47103479/212542033-4acc1cc4-3cde-4017-9189-fbdcf6722fb2.png)  
+  - > cat /etc/kubernetes/manifests/kube-controller-manager.yaml : 인증서에 서명해야 하는 경우 CA서버 경로 인증서와 개인 키가 필요함 
+
+# Security Kubeconfig 
+- kube playground
+  - ![image](https://user-images.githubusercontent.com/47103479/212543709-7fa7a84f-9b3a-40e3-a6ad-a76725e021e4.png)
+  - > curl https://my-kube-playground:6443/api/v1/pods \ --key admin.key --cert admin.crt --cacert ca.crt
+  - > kubectl get pods --server my-kube-playground:6443 --client-key admin.key --client-certificate admin.crt --certificate-authority ca.crt
+- ![image](https://user-images.githubusercontent.com/47103479/212543867-61d29b2b-182e-4eee-a0fa-29d60cdd4714.png)
+  - kubeconfig라는 구성 파일에 옵션으로 저장함 
+- KubeConfig File
+  - ![image](https://user-images.githubusercontent.com/47103479/212544000-edad9e22-b371-4940-b7e4-a60cc92b7bbc.png)
+    - ![image](https://user-images.githubusercontent.com/47103479/212544084-34870c5e-692d-4b63-a6a8-385bf20ebc09.png)
+    - ![image](https://user-images.githubusercontent.com/47103479/212544101-9350ec99-0afd-4936-ab17-f19854c8fb7a.png)
+  - ![image](https://user-images.githubusercontent.com/47103479/212544163-720bffaa-098b-4cb3-beac-41e273646d3d.png)
+    - > kubectl config view : 현재 사용중인 파일 보기
+    - > kubectl config view –kubeconfig=my-custom-config : kubeconfig 옵션을 사용하여 파일 지정할 수 있음 
+  - ![image](https://user-images.githubusercontent.com/47103479/212544198-229d308d-2649-4217-83d8-bac926d55650.png)
+    - > kubectl config use-context prod-user@production : 현재 컨텍스트 변경    
+    - ![image](https://user-images.githubusercontent.com/47103479/212544246-4c4b8ba7-a77d-43d0-8107-ed03b0c08f16.png)  
+      - > kubectl config -h
+- Namespaces
+  - ![image](https://user-images.githubusercontent.com/47103479/212544280-619121ac-f87b-4ce1-861f-871f45bd8d61.png)
+- Certificates in KubeConfig
+  - ![image](https://user-images.githubusercontent.com/47103479/212544301-2ebbb140-c7bd-4e38-b9a5-034124e4cc2b.png)
+  - ![image](https://user-images.githubusercontent.com/47103479/212544426-07fe7dd0-9c39-435e-95ef-e3afa900f4e4.png)
+
+# API Groups 
+- ![image](https://user-images.githubusercontent.com/47103479/212545231-b3a5595a-e9dc-42be-be99-d622897c97ae.png)
+  - 쿠버네티스 API 버전 확인 / 파드 목록 가져오기 
+- ![image](https://user-images.githubusercontent.com/47103479/212545261-437798cb-c38c-4624-8513-e7a5b563fe54.png)
+  - /metrics, /healthz는 클러스터의 상태를 모니터링함 
+  - /logs는 타사 로깅 응용프로ㅡ램과 함께 통합에 사용됨 
+  - /api 
+    - ![image](https://user-images.githubusercontent.com/47103479/212545497-524c0030-f1a7-4950-8fdf-2879abac970a.png)
+    - core그룹으로 모든 핵심 기능이 존재하는 곳. 
+  - /apis
+    - ![image](https://user-images.githubusercontent.com/47103479/212545503-0c4bc5fc-4465-49dd-96cb-f679236fd4ee.png)
+    - named 그룹 API는 더 체계적임. 모든 최신 기능이 이 그룹을 통해 사용할 수 있음 
+- ![image](https://user-images.githubusercontent.com/47103479/212545513-bb795c38-415a-4d5d-879f-85fbcb8afc3b.png)
+  - > curl http://localhost:6443 -k : 사용가능한 API 그룹 나열
+  - > curl http://localhost:6443/apis -k | grep “name” : 지원되는 모든 리소스 그룹을 반환함 
+- ![image](https://user-images.githubusercontent.com/47103479/212545564-25bacede-933f-4060-b516-fd9c624c5098.png)
+- kubectl proxy
+  - ![image](https://user-images.githubusercontent.com/47103479/212545574-95420275-9c79-4f55-ace0-4d3ee2de82f5.png)
+  - > kubectl proxy : 파드와 서비스 간 클러스터의 다른 노드와 연결을 활성화하는데 사용함 
+- kubectl proxy는 kube control utility에서 만든 ACTP 프록시 서비스로 Kube API 서버에 액세스함 
+
+# Authorization
+- ![image](https://user-images.githubusercontent.com/47103479/212546566-128edb08-cbe4-48a1-9a17-2d48ccbe117c.png)
+  - 클러스터 인증이 필요한 이유는 클러스터 관리자로서 모든 종류의 작업을 수행할 수 있음 
+- 권한 부여 매커니즘 
+  - ![image](https://user-images.githubusercontent.com/47103479/212546589-01666923-c92b-467f-bd68-db3993188bd9.png)
+  - Node
+    - ![image](https://user-images.githubusercontent.com/47103479/212546666-558dd825-8765-41c5-b009-7cf58a5b7a66.png)
+    - 특별 권한 부여자인 노드 권한 부여자가 이러한 욫어을 처리함 
+  - ABAC
+    - ![image](https://user-images.githubusercontent.com/47103479/212546725-2e0ecc1e-f17b-4ab6-b38d-ef74ae378ab4.png)
+  - RBAC
+    - ![image](https://user-images.githubusercontent.com/47103479/212546784-1fdb6823-921c-451a-be58-2005d2b5ac5f.png)
+    - 사용자를 직접 연결하는 대신 일련의 권한이 있는 그룹이 역할을 정의함 
+  - Webhook
+    - ![image](https://user-images.githubusercontent.com/47103479/212546838-6faa22c0-4fb9-45f6-b94e-ddb747529c05.png)
+  - AlwaysAllow : 수행하지 않고 모든 요청을 허용함 
+  - AlwaysDeny : 모든 요청을 거부함 
+    - ![image](https://user-images.githubusercontent.com/47103479/212546909-08890eca-5e71-4925-bcd9-38b33768fc80.png)
+
+# RBAC
+- ![image](https://user-images.githubusercontent.com/47103479/212547032-c8ee87bd-ea83-44ac-a086-42e8c3a7cfeb.png) 
+  - kubectl create -f developer-role.yaml  
+- ![image](https://user-images.githubusercontent.com/47103479/212547120-773954f6-95c9-4bf3-b45d-259a92c8456c.png)  
+  - 사용자를 해당 역할에 역할 하는 것. 이를 위해 롤 바인딩이라는 개체를 만듬. 롤 바인딩 개체는 사용자 개체를 역할에 연결함 
+  - > kubectl create -f devuser-developer-binding.yaml
+- > kubectl get roles : 생성된 역할 보기 
+- > kubectl get rolebindings : 롤 바인딩 보기 
+- > kubectl describe role developer : 자세하게 보기
+- > kubectl describe rolebinding devuser-developer-binding : 큐브 컨트롤을 실행하고 롤 바인딩 명령을 설명함. 기존 롤 바인디엥 대한 세부 정보 확인할 수 있음 
+- ![image](https://user-images.githubusercontent.com/47103479/212547368-f758f22d-0b9a-4b53-a305-6ec72006e5a7.png)
+  - > kubectl auth can-i create deployments
+  - > kubectl auth can-i delete nodes
+  - > kubectl auth can-i create deployments --as dev-user
+  - > kubectl auth can-i create pods --as dev-user
+  - > kubectl auth can-i create pods --as dev-user --namespace test
+- Resource Names
+  - ![image](https://user-images.githubusercontent.com/47103479/212547425-95092408-6590-4652-a5d6-84d4a1d3d1ac.png)
