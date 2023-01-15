@@ -23,6 +23,9 @@
 [Day9-Init-Containers](#practice-test---init-containers)<br>
 [Day10-OS Upgrades](#practice-test---os-upgrades)<br>
 [Day10-Cluster Upgrade Process](#practice-test---cluster-upgrade-process)<br>
+[Day10-Cluster Upgrade Process](#practice-test---cluster-upgrade-process)<br>
+[Day11-Backup and Restore Methods](#practice-test---backup-and-restore-methods)<br>
+[Day11-Backup and Restore Methods2](#practice-test---backup-and-restore-methods2)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -2459,3 +2462,351 @@
    
      </details>
    
+## Practice Test - Certificates API
+1. <details>
+   <summary>A new member akshay joined our team. He requires access to our cluster. The Certificate Signing Request is at the /root location.</summary>
+  
+   ```bash
+   pwd
+   ls -l /root 
+   ```
+  
+   </details>
+
+> H
+2. <details>
+   <summary>Create a CertificateSigningRequest object with the name akshay with the contents of the akshay.csr file</summary>
+  
+   ```bash
+   cat > akshay.yaml {링크} # https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/
+   cat akshay.yaml  
+   cat  akshay.csr | base64 -w 0
+   vi akshay.yaml
+   kubectl create -f akshay.yaml
+   kubectl get csr
+   ```
+  
+   </details>
+
+3. <details>
+   <summary>What is the Condition of the newly created Certificate Signing Request object?</summary>
+  
+   ```bash
+   kubectl get csr
+   ```
+  
+   </details>
+
+4. <details>
+   <summary>Approve the CSR Request</summary>
+  
+   ```bash
+   kubectl certificate approve akshay
+   kubectl get csr
+   ```
+  
+   </details>
+
+5. <details>
+   <summary>How many CSR requests are available on the cluster?</summary>
+  
+   ```bash
+   kubectl get csr
+   ```
+  
+   </details>
+
+6. <details>
+   <summary>During a routine check you realized that there is a new CSR request in place. What is the name of this request?</summary>
+  
+   ```bash
+   kubectl get csr
+   ```
+  
+   </details>
+
+7. <details>
+   <summary>Hmmm.. You are not aware of a request coming in. What groups is this CSR requesting access to?</summary>
+  
+   ```bash
+   kubectl get csr agent-smith -o yaml
+   ```
+  
+   </details>
+
+8. <details>
+   <summary>That doesn't look very right. Reject that request.</summary>
+  
+   ```bash
+   kubectl certificate deny agent-smith
+   ```
+  
+   </details>
+
+9. <details>
+   <summary>Let's get rid of it. Delete the new CSR object</summary>
+  
+   ```bash
+   kubectl delete csr agent-smith
+   ```
+  
+   </details>
+
+## Practice Test - KubeConfig
+1. <details>
+   <summary>Where is the default kubeconfig file located in the current environment?</summary>
+  
+   ```bash
+   echo %HOME
+   pwd
+   ls -l /root/.kube
+   ls .kube/config
+   cat .kube/config
+   ```
+  
+   </details>
+
+2. <details>
+   <summary>How many clusters are defined in the default kubeconfig file?</summary>
+  
+   ```bash
+   kubectl config view
+   ```
+  
+   </details>
+
+3. <details>
+   <summary>How many Users are defined in the default kubeconfig file?</summary>
+  
+   ```bash
+   kubectl config view
+   ```
+  
+   </details>
+
+4. <details>
+   <summary>How many contexts are defined in the default kubeconfig file?</summary>
+  
+   ```bash
+   kubectl config view
+   ```
+  
+   </details>
+
+5. <details>
+   <summary>What is the user configured in the current context?</summary>
+  
+   ```bash
+   kubectl config view
+   ```
+  
+   </details>
+
+6. <details>
+   <summary>What is the name of the cluster configured in the default kubeconfig file?</summary>
+  
+   ```bash
+   kubectl config view
+   ```
+  
+   </details>
+
+7. <details>
+   <summary>A new kubeconfig file named my-kube-config is created. It is placed in the /root directory. How many clusters are defined in that kubeconfig file?</summary>
+  
+   ```bash
+   # cat /root/my-kube-config
+   kubectl config view --kubeconfig my-kube-config
+   ```
+  
+   </details>
+
+8. <details>
+   <summary>How many contexts are configured in the my-kube-config file?</summary>
+  
+   ```bash
+   kubectl config view --kubeconfig my-kube-config
+   ```
+  
+   </details>
+
+9. <details>
+   <summary>What user is configured in the research context?</summary>
+  
+   ```bash
+   kubectl config view --kubeconfig my-kube-config
+   ```
+  
+   </details>
+
+10. <details>
+   <summary>What is the name of the client-certificate file configured for the aws-user?</summary>
+  
+   ```bash
+   kubectl config view --kubeconfig my-kube-config
+   ```
+  
+   </details>
+
+11. <details>
+   <summary>What is the current context set to in the my-kube-config file?</summary>
+  
+   ```bash
+   kubectl config view --kubeconfig my-kube-config
+   ```
+  
+   </details>
+
+12. <details>
+   <summary>I would like to use the dev-user to access test-cluster-1. Set the current context to the right one so I can do that.</summary>
+  
+   ```bash
+   # kubectl config --kubeconfig=/root/my-kube-config use-context research
+   kubectl config use-context research --kubeconfig=/root/my-kube-config
+   ```
+  
+   </details>
+
+> H
+13. <details>
+   <summary>We don't want to have to specify the kubeconfig file option on each command. Make the my-kube-config file the default kubeconfig.</summary>
+  
+   ```bash
+   # mv .kube/config .kube/config.bak $ cp /root/my-kube-config .kube/config
+   mv /root/my-kube-config /root/.kube/config
+   ```
+  
+   </details>
+
+14. <details>
+   <summary>With the current-context set to research, we are trying to access the cluster. However something seems to be wrong. Identify and fix the issue.</summary>
+  
+   ```bash
+   kubectl get nodes 
+   cat /root/.kube/config
+   ls /etc/kubernetes/pki/users/dev-user
+   vi /root/.kube/config # dev-user.crt
+   kubectl get nodes
+   ```
+  
+   </details>
+
+## Practice Test - RBAC
+1. <details>
+   <summary>Inspect the environment and identify the authorization modes configured on the cluster.</summary>
+  
+   ```bash
+   # kubectl describe pod kube-apiserver-master -n kube-system
+   cat /etc/kubernetes/manifests/kube-apiserver.yaml
+   ps -aux | grep authorization
+   ```
+  
+   </details>
+
+2. <details>
+   <summary>How many roles exist in the default namespace?</summary>
+  
+   ```bash
+   k get roles 
+   ```
+  
+   </details>
+
+3. <details>
+   <summary>How many roles exist in all namespaces together?</summary>
+  
+   ```bash
+   # kubectl get roles --all-namespaces
+   k get roles -A --no-headers | wc -l
+   ```
+  
+   </details>
+
+4. <details>
+   <summary>What are the resources the kube-proxy role in the kube-system namespace is given access to?</summary>
+  
+   ```bash
+   kubectl describe role kube-proxy -n kube-system
+   ```
+  
+   </details>
+
+5. <details>
+   <summary>What actions can the kube-proxy role perform on configmaps?</summary>
+  
+   ```bash
+   kubectl describe role kube-proxy -n kube-system
+   ```
+  
+   </details>
+
+6. <details>
+   <summary>Which of the following statements are true?</summary>
+  
+   ```bash
+   kubectl describe role kube-proxy -n kube-system
+   ```
+  
+   </details>
+
+7. <details>
+   <summary>Which account is the kube-proxy role assigned to?</summary>
+  
+   ```bash
+   k get rolebinding -n kube-system
+   k describe rolebinding kube-proxy -n kube-system
+   ```
+  
+   </details>
+
+8. <details>
+   <summary>A user dev-user is created. User's details have been added to the kubeconfig file. Inspect the permissions granted to the user. Check if the user can list pods in the default namespace.</summary>
+  
+   ```bash
+   kubectl config view
+   k get pods --as dev-user 
+   ```
+  
+   </details>
+
+> H
+9. <details>
+   <summary>Create the necessary roles and role bindings required for the dev-user to create, list and delete pods in the default namespace.</summary>
+  
+   ```bash
+   k create role developer --verb=list,create,delete --resource=pods
+   k describe role developer
+   k create rolebinding --help
+   k create rolebinding dev-user-binding --role=developer --user=dev-user
+   k describe rolebinding dev-user-binding
+   ```
+  
+   </details>
+
+> H
+10. <details>
+    <summary>A set of new roles and role-bindings are created in the blue namespace for the dev-user. However, the dev-user is unable to get details of the dark-blue-app pod in the blue namespace. Investigate and fix the issue.</summary>
+  
+    ```bash
+    k --as dev-user get pods dark-blue-app -n blue 
+    k get roles -n blue
+    k get rolebinding -n blue 
+    k describe role developer -n blue 
+    k edit role developer -n blue # dark-blue-app
+    k --as dev-user get pods dark-blue-app -n blue 
+    ```
+  
+    </details>
+
+> H
+11. <details>
+    <summary>Add a new rule in the existing role developer to grant the dev-user permissions to create deployments in the blue namespace.</summary>
+  
+    ```bash
+    k --as dev-user create deployment nginx --image=nginx -n blue
+    k edit role developer -n blue # apps 추가 
+    k describe role developer -n blue 
+    k --as dev-user create deployment nginx --image=nginx -n blue
+    ```
+  
+    </details>
