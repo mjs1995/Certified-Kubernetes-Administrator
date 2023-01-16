@@ -1,5 +1,6 @@
 # study
 - [Day11](#security-primitives)<br>
+- [Day12](#tls-in-kubernetes)<br>
 
 # Security Primitives 
 - 비밀번호 기반 인증 비활성화, 경로 액세스 비활성화, SSH 키 기반 인증만 사용할 수 있음 
@@ -252,3 +253,53 @@
   - > kubectl auth can-i create pods --as dev-user --namespace test
 - Resource Names
   - ![image](https://user-images.githubusercontent.com/47103479/212547425-95092408-6590-4652-a5d6-84d4a1d3d1ac.png)
+
+# Cluster Roles 
+- ![image](https://user-images.githubusercontent.com/47103479/212674295-e1a29a56-adb7-40f2-9c93-4887788f5287.png)
+  - > kubectl api-resources --namespaced=true
+  - > kubectl api-resources --namespaced=false
+- ![image](https://user-images.githubusercontent.com/47103479/212674515-16aeb6fb-5a5c-4a57-9119-5b2307c0f5ff.png)
+- clusterrolebinding
+  - ![image](https://user-images.githubusercontent.com/47103479/212674675-c20f1de3-963f-4016-b7c6-4a13f6571191.png)
+  - > kubectl create –f cluster-admin-role-binding.yaml
+
+# Service Accounts
+- > kubectl create serviceaccount dashboard-sa
+- > kubectl get serviceaccount : 해당 서비스 계정에는 비밀 개체가 있음 
+- > kubectl describe serviceaccount dashboard-sa
+- > kubectl describe secret dashboard-sa-token-kbbdm
+- > kubectl exec -it my-kubernetes-dashboard ls /var/run/sevrets/kubernetes.io/serviceaccount : 파드 내부의 디렉토리의 내용 나열 
+  - > kubectl exec -it my-kubernetes-dashboard cat /var/run/sevrets/kubernetes.io/serviceaccount/token : 해당 파일의 내용 나열하면 사용할 토큰이 표시됨 
+- > jq -R 'split(".") | select(length > 0) | .[0],.[1] | @base64d | fromjson' <<< eyJhbGcioiJ... : 토큰 디코딩(jwt.io에서 복사 붙여넣기 가능) 
+- > kubectl create token dashboard-sa
+
+# Image Security
+- ![image](https://user-images.githubusercontent.com/47103479/212689193-ade978e4-e74c-4a17-9160-4758522f138a.png)
+  - library는 사용자 계정 이름을 나타내는 위치인데 제공하지 않으면 library로 가정함 
+  - 이미지를 가져올 위치를 지정하지 않았기 때문에 도커의 기본 레지스트리인 도커 허브로 간주됨 
+- Private Repository
+  - > docker login private-registry.io
+  - > docker run private-registry.io/apps/internal-app
+  - ![image](https://user-images.githubusercontent.com/47103479/212689911-582103c0-c429-4651-825d-eb61af3d1b23.png)
+    - 이미지 이름을 개인 레지스트리에 있는 전체 경로로 바꿈 
+  - > kubectl create secret docker-registry regcred \ --docker-server= private-registry.io  \ --docker-username= registry-user \ --docker-password= registry-password \ --docker-email= registry-user@org.com
+
+# Docker Security
+- > docker run ubuntu sleep 3600 
+- > ps aux : 프로세스를 나열
+- Docker 이미지 자체에 사용자 보안을 강화하기 위해 정의를 함 
+- > docker build -t my-ubuntu-image
+- > docker run my-ubuntu-image sleep 3600
+- 루트 사용자 시스템에 제한 없이 액세스 할 수 있음. 
+  - /usr/include/linux/capability.h
+  - 파일 수정 및 파일에 대한 권한, 액세스 제어, 프로세스 생성 또는 종료, 그룹 ID 또는 사용자 ID 설정, 네트워크 관련 작업 수행, 네트워크 파트 제어 등
+- > docker run --cap-drop KILL ubuntu : 권한 삭제 
+- > docker run --privileged ubuntu : 모든 권한이 활성화된 상태에서 컨테이너 실행 
+
+# Security Contexts
+- > docker run --user=1001 ubuntu sleep 3600
+- > docker run -cap-add MAC_ADMIN ubuntu
+- Kubernetes Security
+  - 컨테이너는 파드에 캡슐화됨. 보안 설정을 컨테이너 수준 또는 파드 수준에서 구성하도록 선택할 수 있음 
+  - Security Context
+    - ![image](https://user-images.githubusercontent.com/47103479/212695248-354363ac-ae4a-4c42-a8fc-24475dcb6762.png)
