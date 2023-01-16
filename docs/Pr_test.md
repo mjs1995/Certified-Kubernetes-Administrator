@@ -26,6 +26,8 @@
 [Day10-Cluster Upgrade Process](#practice-test---cluster-upgrade-process)<br>
 [Day11-Backup and Restore Methods](#practice-test---backup-and-restore-methods)<br>
 [Day11-Backup and Restore Methods2](#practice-test---backup-and-restore-methods2)<br>
+[Day12-View Certificates](#practice-test---view-certificates)<br>
+[Day12-Certificates API](#practice-test---certificates-api)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -2461,7 +2463,7 @@
      ```
    
      </details>
-   
+
 ## Practice Test - Certificates API
 1. <details>
    <summary>A new member akshay joined our team. He requires access to our cluster. The Certificate Signing Request is at the /root location.</summary>
@@ -2640,56 +2642,56 @@
    </details>
 
 10. <details>
-   <summary>What is the name of the client-certificate file configured for the aws-user?</summary>
+    <summary>What is the name of the client-certificate file configured for the aws-user?</summary>
   
-   ```bash
-   kubectl config view --kubeconfig my-kube-config
-   ```
+    ```bash
+    kubectl config view --kubeconfig my-kube-config
+    ```
   
-   </details>
+    </details>
 
 11. <details>
-   <summary>What is the current context set to in the my-kube-config file?</summary>
+    <summary>What is the current context set to in the my-kube-config file?</summary>
   
-   ```bash
-   kubectl config view --kubeconfig my-kube-config
-   ```
+    ```bash
+    kubectl config view --kubeconfig my-kube-config
+    ```
   
-   </details>
+    </details>
 
 12. <details>
-   <summary>I would like to use the dev-user to access test-cluster-1. Set the current context to the right one so I can do that.</summary>
+    <summary>I would like to use the dev-user to access test-cluster-1. Set the current context to the right one so I can do that.</summary>
   
-   ```bash
-   # kubectl config --kubeconfig=/root/my-kube-config use-context research
-   kubectl config use-context research --kubeconfig=/root/my-kube-config
-   ```
+    ```bash
+    # kubectl config --kubeconfig=/root/my-kube-config use-context research
+    kubectl config use-context research --kubeconfig=/root/my-kube-config
+    ```
   
-   </details>
+    </details>
 
 > H
 13. <details>
-   <summary>We don't want to have to specify the kubeconfig file option on each command. Make the my-kube-config file the default kubeconfig.</summary>
+    <summary>We don't want to have to specify the kubeconfig file option on each command. Make the my-kube-config file the default kubeconfig.</summary>
   
-   ```bash
-   # mv .kube/config .kube/config.bak $ cp /root/my-kube-config .kube/config
-   mv /root/my-kube-config /root/.kube/config
-   ```
+    ```bash
+    # mv .kube/config .kube/config.bak $ cp /root/my-kube-config .kube/config
+    mv /root/my-kube-config /root/.kube/config
+    ```
   
-   </details>
+    </details>
 
 14. <details>
-   <summary>With the current-context set to research, we are trying to access the cluster. However something seems to be wrong. Identify and fix the issue.</summary>
+    <summary>With the current-context set to research, we are trying to access the cluster. However something seems to be wrong. Identify and fix the issue.</summary>
   
-   ```bash
-   kubectl get nodes 
-   cat /root/.kube/config
-   ls /etc/kubernetes/pki/users/dev-user
-   vi /root/.kube/config # dev-user.crt
-   kubectl get nodes
-   ```
+    ```bash
+    kubectl get nodes 
+    cat /root/.kube/config
+    ls /etc/kubernetes/pki/users/dev-user
+    vi /root/.kube/config # dev-user.crt
+    kubectl get nodes
+    ```
   
-   </details>
+    </details>
 
 ## Practice Test - RBAC
 1. <details>
@@ -2807,6 +2809,283 @@
     k edit role developer -n blue # apps 추가 
     k describe role developer -n blue 
     k --as dev-user create deployment nginx --image=nginx -n blue
+    ```
+  
+    </details>
+
+## Practice Test - Cluster Roles
+2. <details>
+    <summary>How many ClusterRoles do you see defined in the cluster?</summary>
+  
+    ```bash
+    k get clusterroles --no-headers | wc -l
+    ```
+  
+    </details>
+
+3. <details>
+    <summary>How many ClusterRoleBindings exist on the cluster?</summary>
+  
+    ```bash
+    k get clusterrolebindings --no-headers | wc -l
+    ```
+  
+    </details>
+
+4. <details>
+    <summary>What namespace is the cluster-admin clusterrole part of?</summary>
+  
+    ```bash
+    k get clusterroles
+    ```
+  
+    </details>
+
+5. <details>
+    <summary>What user/groups are the cluster-admin role bound to?</summary>
+  
+    ```bash
+    k get clusterrolebindings | grep cluster-admin
+    k describe clusterrolebindings cluster-admin
+    k describe clusterrolebindings helm-kube-system-traefik-crd
+    ```
+  
+    </details>
+
+6. <details>
+    <summary>What level of permission does the cluster-admin role grant?</summary>
+  
+    ```bash
+    k describe clusterrole cluster-admin
+    ```
+  
+    </details>
+
+> H
+7. <details>
+    <summary>A new user michelle joined the team. She will be focusing on the nodes in the cluster. Create the required ClusterRoles and ClusterRoleBindings so she gets access to the nodes.</summary>
+  
+    ```bash
+    kubectl create clusterrole michelle-role --verb=get,list,watch --resource=nodes
+    kubectl create clusterrolebinding michelle-role-binding --clusterrole=michelle-role --user=michelle
+    k describe clusterrole michelle-role
+    k describe clusterrolebindings michelle-role-binding
+    k get nodes --as michelle
+    ```
+  
+    </details>
+
+> H
+8. <details>
+    <summary>michelle's responsibilities are growing and now she will be responsible for storage as well. Create the required ClusterRoles and ClusterRoleBindings to allow her access to Storage.</summary>
+  
+    ```bash
+    kubectl api-resources
+    k create clusterrole storage-admin --resource=persistentvolumes,storageclasses --verb=list,create,get,watch
+    k describe clusterrole storage-admin
+    k get clusterrole storage-admin -o yaml
+    k create clusterrolebinding michelle-storage-admin --user=michelle --clusterrole=storage-admin
+    k describe clusterrolebindings michelle-storage-admin
+    k --as michelle get storageclass
+    ```
+  
+    </details>
+
+## Practice Test - Service Accounts
+1. <details>
+    <summary>How many Service Accounts exist in the default namespace?</summary>
+  
+    ```bash
+    kubectl get serviceaccounts
+    ```
+  
+    </details>
+
+2. <details>
+    <summary>What is the secret token used by the default service account?</summary>
+  
+    ```bash
+    kubectl describe serviceaccount default
+    ```
+  
+    </details>
+
+3. <details>
+    <summary>We just deployed the Dashboard application. Inspect the deployment. What is the image used by the deployment?</summary>
+  
+    ```bash
+    kubectl describe deployment
+    ```
+  
+    </details>
+
+7. <details>
+    <summary>Which account does the Dashboard application use to query the Kubernetes API?</summary>
+  
+    ```bash
+    kubectl get po -o yaml | grep -i serviceaccount
+    ```
+  
+    </details>
+
+8. <details>
+    <summary>Inspect the Dashboard Application POD and identify the Service Account mounted on it.</summary>
+  
+    ```bash
+    kubectl describe pod
+    ```
+  
+    </details>
+
+9. <details>
+    <summary>At what location is the ServiceAccount credentials available within the pod?</summary>
+  
+    ```bash
+    kubectl describe pod
+    ```
+  
+    </details>
+
+10. <details>
+    <summary>The application needs a ServiceAccount with the Right permissions to be created to authenticate to Kubernetes. The default ServiceAccount has limited access. Create a new ServiceAccount named dashboard-sa.</summary>
+  
+    ```bash
+    kubectl create serviceaccount dashboard-sa
+    ```
+  
+    </details>
+
+11. <details>
+    <summary>You shouldn't have to copy and paste the token each time. The Dashboard application is programmed to read token from the secret mount location. However currently, the default service account is mounted. Update the deployment to use the newly created ServiceAccount</summary>
+  
+    ```bash
+    # kubectl create token dashboard-sa
+    kubectl edit deploy web-dashboard # serviceAccountName: dashboard-sa
+    ```
+  
+    </details>
+
+## Practice Test - Image Security
+1. <details>
+    <summary>What secret type must we choose for docker registry?</summary>
+  
+    ```bash
+    kubectl create secret
+    ```
+  
+    </details>
+
+2. <details>
+    <summary>We have an application running on our cluster. Let us explore it first. What image is the application using?</summary>
+  
+    ```bash
+    kubectl get deploy -o wide
+    k describe deploy web
+    ```
+  
+    </details>
+
+3. <details>
+    <summary>We decided to use a modified version of the application from an internal private registry. Update the image of the deployment to use a new image from myprivateregistry.com:5000</summary>
+  
+    ```bash
+    k edit deployment web 
+    k describe deploy web
+    ```
+  
+    </details>
+
+4. <details>
+    <summary>Are the new PODs created with the new images successfully running?</summary>
+  
+    ```bash
+    k get pods
+    k describe pod web-87bb989dc-5bkzt
+    ```
+  
+    </details>
+
+5. <details>
+    <summary>Create a secret object with the credentials required to access the registry.</summary>
+  
+    ```bash
+    k create secret docker-registry private-reg-cred --docker-username=dock_user --docker-password=dock_password --docker-server=myprivateregistry.com:5000 --docker-email=dock_user@myprivateregistry.com
+    ```
+  
+    </details>
+
+> N
+6. <details>
+    <summary>Configure the deployment to use credentials from the new secret to pull images from the private registry</summary>
+  
+    ```bash
+    k edit deploy web # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ 
+    # imagePullSecrets:  - name: private-reg-cred
+    k describe deploy web
+    ```
+  
+    </details>
+
+## Practice Test - Security Context
+1. <details>
+    <summary>What is the user used to execute the sleep process within the ubuntu-sleeper pod?</summary>
+  
+    ```bash
+    k exec ubuntu-sleeper -- whoami
+    ```
+  
+    </details>
+
+> N
+2. <details>
+    <summary>Edit the pod ubuntu-sleeper to run the sleep process with user ID 1010.</summary>
+  
+    ```bash
+    # https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    k edit pod ubuntu-sleeper # securityContext : \ runAsUser: 1010
+    k replace --force -f /tmp/kubectl-edit-1786819119.yaml
+    k exec ubuntu-sleeper -- whoami
+    ```
+  
+    </details>
+
+3. <details>
+    <summary>A Pod definition file named multi-pod.yaml is given. With what user are the processes in the web container started?</summary>
+  
+    ```bash
+    cat multi-pod.yaml
+    ```
+  
+    </details>
+
+4. <details>
+    <summary>With what user are the processes in the sidecar container started?</summary>
+  
+    ```bash
+    cat multi-pod.yaml
+    ```
+  
+    </details>
+
+> H
+5. <details>
+    <summary>Update pod ubuntu-sleeper to run as Root user and with the SYS_TIME capability.</summary>
+  
+    ```bash
+    # https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    k edit pod ubuntu-sleeper # capabilities:        add: ["SYS_TIME"]
+    k replace --force -f /tmp/kubectl-edit-79364768.yaml
+    ```
+  
+    </details>
+
+6. <details>
+    <summary>Now update the pod to also make use of the NET_ADMIN capability.</summary>
+  
+    ```bash
+    # https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    k edit pod ubuntu-sleeper # capabilities:        add: ["NET_ADMIN", "SYS_TIME"]
+    k replace --force -f /tmp/kubectl-edit-2192387685.yaml
     ```
   
     </details>
