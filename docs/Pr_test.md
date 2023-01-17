@@ -27,7 +27,8 @@
 [Day11-Backup and Restore Methods](#practice-test---backup-and-restore-methods)<br>
 [Day11-Backup and Restore Methods2](#practice-test---backup-and-restore-methods2)<br>
 [Day12-View Certificates](#practice-test---view-certificates)<br>
-[Day12-Certificates API](#practice-test---certificates-api)<br>
+[Day13-Certificates API](#practice-test---certificates-api)<br>
+[Day13-KubeConfig](#practice-test---kubeconfig)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -3086,6 +3087,75 @@
     # https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
     k edit pod ubuntu-sleeper # capabilities:        add: ["NET_ADMIN", "SYS_TIME"]
     k replace --force -f /tmp/kubectl-edit-2192387685.yaml
+    ```
+  
+    </details>
+
+# Practice Test - Network Policies
+1. <details>
+    <summary>How many network policies do you see in the environment?</summary>
+  
+    ```bash
+    kubectl get networkpolicy
+    k get netpol
+    ```
+  
+    </details>
+
+2. <details>
+    <summary>What is the name of the Network Policy?</summary>
+  
+    ```bash
+    k get netpol
+    ```
+  
+    </details>
+
+3. <details>
+    <summary>Which pod is the Network Policy applied on?</summary>
+  
+    ```bash
+    k get netpol
+    ```
+  
+    </details>
+
+4. <details>
+    <summary>What type of traffic is this Network Policy configured to handle?</summary>
+  
+    ```bash
+    k describe networkpolicy
+    ```
+  
+    </details>
+
+5. <details>
+    <summary>What is the impact of the rule configured on this Network Policy?</summary>
+  
+    ```bash
+    k describe networkpolicy
+    ```
+  
+    </details>
+
+6. <details>
+    <summary>What is the impact of the rule configured on this Network Policy?</summary>
+  
+    ```bash
+    k describe networkpolicy
+    ```
+  
+    </details>
+
+> H
+10. <details>
+    <summary>Create a network policy to allow traffic from the Internal application only to the payroll-service and db-service.</summary>
+  
+    ```bash
+    # https://kubernetes.io/docs/concepts/services-networking/network-policies/
+    vi internal-policy.yaml
+    k create -f internal-policy.yaml
+    k describe netpol internal-policy 
     ```
   
     </details>
