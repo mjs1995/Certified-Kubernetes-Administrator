@@ -1,6 +1,9 @@
 # study
 - [Day11](#security-primitives)<br>
 - [Day12](#tls-in-kubernetes)<br>
+- [Day13](#security-kubeconfig)<br>
+- [Day14](#cluster-roles)<br>
+- [Day15](#network-policies)<br>
 
 # Security Primitives 
 - 비밀번호 기반 인증 비활성화, 경로 액세스 비활성화, SSH 키 기반 인증만 사용할 수 있음 
@@ -303,3 +306,55 @@
   - 컨테이너는 파드에 캡슐화됨. 보안 설정을 컨테이너 수준 또는 파드 수준에서 구성하도록 선택할 수 있음 
   - Security Context
     - ![image](https://user-images.githubusercontent.com/47103479/212695248-354363ac-ae4a-4c42-a8fc-24475dcb6762.png)
+
+# Network Policies
+- Ingress & Egress
+  - ![image](https://user-images.githubusercontent.com/47103479/212896159-9dae3afd-b51c-41c4-9c5f-5a60eeabc36b.png)
+  - Ingress 트래픽은 사용자로부터 들어오는 트래픽 
+  - Egress 트래픽은 앱 서버로 나가는 요청 
+- Traffic
+  - ![image](https://user-images.githubusercontent.com/47103479/212896319-f6d56a18-cecd-4f9b-a996-f42a764a67bf.png)
+- ![image](https://user-images.githubusercontent.com/47103479/212897116-7d803f42-7de5-4882-b824-9573a5dbefe6.png)
+- ![image](https://user-images.githubusercontent.com/47103479/212897293-4da9c10e-91df-4ef9-a078-3e158c176e01.png)
+- ![image](https://user-images.githubusercontent.com/47103479/212897499-d00dde77-19c1-496d-a4d9-74047a8cf040.png)
+- ![image](https://user-images.githubusercontent.com/47103479/212899521-d8d85d0f-c19c-40a3-afde-8c7e9dd8cd5f.png)
+  - from 필드는 트래픽 소스를 정의함. 포트 필드는 데이터베이스 파드의 포트를 정의함 
+- ![image](https://user-images.githubusercontent.com/47103479/212899986-52445769-4a92-4f9a-a1a1-c186a62acff4.png)
+  - ipblock을 사용하면 IP 주소 범위를 지정할 수 있음 
+- ![image](https://user-images.githubusercontent.com/47103479/212900221-aaa652a6-cee6-47a1-bbe1-6eb1850f1687.png)
+  - 데이터 베이스 파드에서 외부 백업 서버로 트래픽이 발생하며 이를 위해 egress 규칙을 정의해야함 
+
+# Kubectx 및 Kubens
+- Kubectx
+  - 컨텍스트 간에 전환하기 위해 긴 "kubectl config" 명령을 사용할 필요가 없음.     
+  - 다중 클러스터 환경에서 클러스터 간에 컨텍스트를 전환하는 데 특히 유용함
+  - ```bash
+    # Installation
+    sudo git clone https://github.com/ahmetb/kubectx /opt/kubectx
+    sudo ln -s /opt/kubectx/kubectx /usr/local/bin/kubectx
+
+    # To list all contexts:
+    kubectx
+
+    # To switch to a new context:
+    kubectx <context_name>
+
+    # To switch back to previous context:
+    kubectx -
+
+    # To see current context:
+    kubectx -c
+    ```
+- Kubens
+  - 간단한 명령으로 네임스페이스 간에 빠르게 전환할 수 있음
+  - ```bash
+    # Installation:
+    sudo git clone https://github.com/ahmetb/kubectx /opt/kubectx
+    sudo ln -s /opt/kubectx/kubens /usr/local/bin/kubens
+
+    # To switch to a new namespace:
+    kubens <new_namespace>
+
+    To switch back to previous namespace:
+    kubens -
+    ```
