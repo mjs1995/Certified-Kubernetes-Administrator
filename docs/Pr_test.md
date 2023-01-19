@@ -28,7 +28,13 @@
 [Day11-Backup and Restore Methods2](#practice-test---backup-and-restore-methods2)<br>
 [Day12-View Certificates](#practice-test---view-certificates)<br>
 [Day13-Certificates API](#practice-test---certificates-api)<br>
+[Day13-RBAC](#practice-test---rbac)<br>
 [Day13-KubeConfig](#practice-test---kubeconfig)<br>
+[Day14-Cluster Roles](#practice-test---cluster-roles)<br>
+[Day14-Service Accounts](#practice-test---service-accounts)<br>
+[Day14-Image Security](#practice-test---image-security)<br>
+[Day14-Security Context](#practice-test---security-context)<br>
+[Day15-Network Policies](#practice-test---network-policies)<br>
 
 # Core Concepts
 ## Practice Test - PODs
