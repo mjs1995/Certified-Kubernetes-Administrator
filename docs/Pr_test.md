@@ -35,6 +35,8 @@
 [Day14-Image Security](#practice-test---image-security)<br>
 [Day14-Security Context](#practice-test---security-context)<br>
 [Day15-Network Policies](#practice-test---network-policies)<br>
+[Day16-Persistent Volume Claims](#practice-test---persistent-volume-claims)<br>
+[Day16-Storage Class](#practice-test---storage-class)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -3165,3 +3167,292 @@
     ```
   
     </details>
+
+# Storage
+## Practice Test - Persistent Volume Claims
+1. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pods
+    ```
+  
+    </details>
+
+2. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k exec webapp --cat /log/app.log
+    ```
+  
+    </details>
+
+3. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k describe webapp 
+    ```
+  
+    </details>
+
+4. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    ls /var/log/webapp 
+    k edit pod webapp # name:log-volume, hstPath: path: /var/log/webapp, type: Directory / nmae: loge-volume
+    k replace --force -f .yaml    
+    cd /var/log/webapp 
+    cat app.log
+    ```
+  
+    </details>
+
+5. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+    cd ~ 
+    vi pv.yaml
+    k create -f pv.yaml 
+    k get pv
+    ```
+  
+    </details>
+
+6. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+    vi pvc.yaml
+    k create -f pvc.yaml 
+    k get pvc
+    ```
+  
+    </details>
+
+7. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pvc
+    ```
+  
+    </details>
+
+8. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pv
+    ```
+  
+    </details>
+
+9. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pv
+    cat pv.yaml 
+    cat pvc.yaml 
+    ```
+  
+    </details>
+
+10. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    vi pvc.yaml 
+    k replace --force -f pvc.yaml    
+    ```
+  
+    </details>
+
+11. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pv
+    k get pvc 
+    ```
+  
+    </details>
+
+
+12. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+    k edit pod webapp 
+    k replace --force -f .yaml
+    cat /pv/log/app.log
+    ```
+  
+    </details>
+
+13. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pv pv-log
+    ```
+  
+    </details>
+
+14. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pv pv-log
+    ```
+  
+    </details>
+
+15. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pvc
+    k delete pvc claim-log-1
+    k get pvc 
+    ```
+  
+    </details>
+
+16. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k describe pvc claim-log-1
+    ```
+  
+    </details>
+
+17. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k delete pod webapp
+    ```
+  
+    </details>
+
+18. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pvc 
+    ```
+  
+    </details>
+
+19. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pv 
+    ```
+  
+    </details>
+
+## Practice Test - Storage Class
+1. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get storageclass
+    k get sc 
+    ```
+  
+    </details>
+
+2. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get sc 
+    ```
+  
+    </details>
+
+6. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pv
+    k get pvc
+    ```
+  
+    </details>
+
+7. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+    vi pvc.yaml 
+    k create -f pvc.yaml
+    k get pvc 
+    ```
+  
+    </details>
+
+8. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pvc 
+    ```
+  
+    </details>
+
+9. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k describe pvc local-pvc 
+    ```
+  
+    </details>
+
+11. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k run nginx --image=ngix:alpine --dry-run=client -o yaml
+    k run nginx --image=ngix:alpine --dry-run=client -o yaml > nginx.yaml
+    k create -f nginx.yaml
+    k get pod
+    ```
+  
+    </details>
+
+12. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    k get pvc
+    ```
+  
+    </details>
+
+> N
+13. <details>
+    <summary>Create a </summary>
+  
+    ```bash
+    # https://kubernetes.io/docs/concepts/storage/storage-classes/
+    vi delayed-volume-sc.yaml
+    k create -f delayed-volume-sc.yaml
+    k get sc 
+    ```
+  
+    </details>
+
