@@ -1,0 +1,31 @@
+# study
+- [Day16](#linux-networking-basics)<br>
+
+# Linux Networking Basics
+- Networking Pre-Requisites
+  - ![image](https://user-images.githubusercontent.com/47103479/214087391-17a1791e-a2c4-4191-8581-9b0bc1f4ead1.png)
+- Switching
+  - 스위치는 두 시스템을 포함하는 네트워크를 생성함
+  - ![image](https://user-images.githubusercontent.com/47103479/214087663-721b0d17-caa9-4c6c-beab-f292dc6b3914.png)
+  - > ip link : 호스트의 수정 인터페이스를 나열함 
+  - > ip addr : 할당된 IP 주소를 확인함 
+  - > ip addr add 192.168.1.10/24 dev eth0 : 해당 인터페이스에 IP 주소 추가 명령
+- Routing
+  - 라우터는 두 네트워크를 함께 연결하는 데 도움이 됨
+  - 라우터는 네트워크의 또 다른 장치일 뿐
+  - ![image](https://user-images.githubusercontent.com/47103479/214088180-fc8770d5-ead9-411e-b9b3-4f859fac1ba2.png)
+- Gateway
+  - 네트워크가 방이라면,Gateway는 다른 네트워크나 인터넷으로 외부 세계로 통하는 문
+  - ![image](https://user-images.githubusercontent.com/47103479/214088868-7c5eb8ad-27e8-46a9-84d3-9246fb95084d.png)
+  - > route : IP 경로 또는 단순히 경로 명령 
+  - > ip route show # ip route list : 라우팅 테이블을 보는데 사용됨  
+  - > ip route add 192.168.1.0/24 via 192.168.2.1 : IP 경로 추가 명령 
+- ![image](https://user-images.githubusercontent.com/47103479/214089611-147c1b53-c388-411d-a500-ccc13e3dbbf7.png)
+  - 호스트 A에게 문이 또는 네트워크 2의 게이트웨이는 호스트 B를 함.라우팅 테이블 항목을 추가하여 이를 수행함
+  - > ip route add 192.168.2.0/24 via 192.168.1.6
+  - > ip route add 192.168.1.0/24 via 192.168.2.6
+  - > ping 192.168.2.5 # 라우팅 항목이 옳음 
+- ![image](https://user-images.githubusercontent.com/47103479/214090383-30ed87f9-f81a-4c09-86ab-eac8634a701f.png)
+  - 한 네트워크에서 다른 네트워크로 호스트가 패킷을 전달할 수 있는지 여부는 인터페이스 간은 설정에 의해 관리됨
+  - > cat /proc/sys/net/ipv4/ip_forward # 없음 : 호스트에서 IP 전달이 활성화된 경우 확인 명령 
+  - > echo 1 > /proc/sys/net/ipv4/ip_forward # 1로 설정하면 핑이 통과하는 것을 볼 수 있음 
