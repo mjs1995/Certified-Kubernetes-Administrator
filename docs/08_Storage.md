@@ -1,4 +1,6 @@
 # study
+- [Day15](#docker-storage)<br>
+- [Day16](#persistent-volumes)<br>
 
 # Docker Storage
 - 도커 스토리지의 두 가지 개념
@@ -51,3 +53,28 @@
 - ![image](https://user-images.githubusercontent.com/47103479/212910446-75fabe9d-774b-43c8-8b00-1542ffa17548.png)
   - 다중 노드 클러스터에서 포드가 슬래시 데이터 디렉토리를 사용하기 때문입니다. 사용을 권장하지 않음
   - Kubernetes는 여러 유형의 클러스터 스토리지 솔루션을 지원함 
+
+# Persistent Volumes
+- ![image](https://user-images.githubusercontent.com/47103479/214075755-a58f9284-fa35-43c7-acb6-15c178fb33c8.png)
+  - 영구 볼륨은 관리자가 구성한 스토리지 볼룸으로 클러스터에 애플레케이션을 배포하는 사용자가 사용하는 클러스터 전체 풀
+  - ![image](https://user-images.githubusercontent.com/47103479/214076070-d025fa3a-0f5d-4200-b908-ab4e503748d5.png)
+  - > kubectl create –f pv-definition.yaml
+  - > kubectl get persistentvolume
+
+# Persistnet Volume Claims
+- 저장소를 사용하기 위해 관리자는 영구 볼륨 세트를 생성하고 사용자가 영구 볼륨 클레임을 생성합니다.
+- 영구 볼륨 클레임이 생성되면 요청 및 볼륨에 설정된 속성에 대해 Kubernetes는 영구 볼륨을 클레임 기반으로 바인딩합니다.
+- ![image](https://user-images.githubusercontent.com/47103479/214076923-a510f1b5-df46-4f1e-b88d-768fc3b02b46.png)
+- ![image](https://user-images.githubusercontent.com/47103479/214077757-ff675902-d142-4ac0-a930-0a062da6eb33.png)
+  - > kubectl create –f pvc-definition.yaml
+  - > kubectl get persistentvolumeclaim
+  - > kubectl delete persistentvolumeclaim myclaim
+- ![image](https://user-images.githubusercontent.com/47103479/214077882-aa67ab83-6117-40ec-b9b8-00c244d3797d.png)
+
+# Storage Classes
+- ![image](https://user-images.githubusercontent.com/47103479/214083798-ce775988-b18c-44c5-899b-18e96393480c.png)
+  - Google Cloud 영구 디스크에서 PV가 생성되기 전에 Google Cloud에서 디스크를 만들었어야 합니다.
+  - 볼륨의 동적 프로비저닝 : Google 스토리지와 같은 Google Cloud에서 스토리지를 자동으로 프로비저닝할 수 있는 요청이 있을 때 포드에 연결함
+    - ![image](https://user-images.githubusercontent.com/47103479/214084337-afcd97a4-add3-4f80-b8c2-9326f4fa495f.png)
+- storage class
+  - ![image](https://user-images.githubusercontent.com/47103479/214084535-073c65bc-b229-43ae-949f-babf8d66d8b9.png)
