@@ -37,6 +37,7 @@
 [Day15-Network Policies](#practice-test---network-policies)<br>
 [Day16-Persistent Volume Claims](#practice-test---persistent-volume-claims)<br>
 [Day16-Storage Class](#practice-test---storage-class)<br>
+[Day17-Explore Env](#practice-test---explore-env)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -3171,7 +3172,7 @@
 # Storage
 ## Practice Test - Persistent Volume Claims
 1. <details>
-    <summary>Create a </summary>
+    <summary>We have deployed a POD. Inspect the POD and wait for it to start running. </summary>
   
     ```bash
     k get pods
@@ -3180,7 +3181,7 @@
     </details>
 
 2. <details>
-    <summary>Create a </summary>
+    <summary>The application stores logs at location /log/app.log. View the logs. </summary>
   
     ```bash
     k exec webapp --cat /log/app.log
@@ -3189,7 +3190,7 @@
     </details>
 
 3. <details>
-    <summary>Create a </summary>
+    <summary>If the POD was to get deleted now, would you be able to view these logs. </summary>
   
     ```bash
     k describe webapp 
@@ -3198,7 +3199,7 @@
     </details>
 
 4. <details>
-    <summary>Create a </summary>
+    <summary>Configure a volume to store these logs at /var/log/webapp on the host. </summary>
   
     ```bash
     ls /var/log/webapp 
@@ -3211,7 +3212,7 @@
     </details>
 
 5. <details>
-    <summary>Create a </summary>
+    <summary>Create a Persistent Volume with the given specification. </summary>
   
     ```bash
     # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
@@ -3224,7 +3225,7 @@
     </details>
 
 6. <details>
-    <summary>Create a </summary>
+    <summary>Let us claim some of that storage for our application. Create a Persistent Volume Claim with the given specification. </summary>
   
     ```bash
     # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
@@ -3236,7 +3237,7 @@
     </details>
 
 7. <details>
-    <summary>Create a </summary>
+    <summary>What is the state of the Persistent Volume Claim? </summary>
   
     ```bash
     k get pvc
@@ -3245,7 +3246,7 @@
     </details>
 
 8. <details>
-    <summary>Create a </summary>
+    <summary>What is the state of the Persistent Volume? </summary>
   
     ```bash
     k get pv
@@ -3254,7 +3255,7 @@
     </details>
 
 9. <details>
-    <summary>Create a </summary>
+    <summary>Why is the claim not bound to the available Persistent Volume? </summary>
   
     ```bash
     k get pv
@@ -3265,7 +3266,7 @@
     </details>
 
 10. <details>
-    <summary>Create a </summary>
+    <summary>Update the Access Mode on the claim to bind it to the PV. </summary>
   
     ```bash
     vi pvc.yaml 
@@ -3275,7 +3276,7 @@
     </details>
 
 11. <details>
-    <summary>Create a </summary>
+    <summary>You requested for 50Mi, how much capacity is now available to the PVC?</summary>
   
     ```bash
     k get pv
@@ -3286,7 +3287,7 @@
 
 
 12. <details>
-    <summary>Create a </summary>
+    <summary>Update the webapp pod to use the persistent volume claim as its storage. </summary>
   
     ```bash
     # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
@@ -3298,7 +3299,7 @@
     </details>
 
 13. <details>
-    <summary>Create a </summary>
+    <summary>What is the Reclaim Policy set on the Persistent Volume pv-log? </summary>
   
     ```bash
     k get pv pv-log
@@ -3307,7 +3308,7 @@
     </details>
 
 14. <details>
-    <summary>Create a </summary>
+    <summary>What would happen to the PV if the PVC was destroyed? </summary>
   
     ```bash
     k get pv pv-log
@@ -3316,7 +3317,7 @@
     </details>
 
 15. <details>
-    <summary>Create a </summary>
+    <summary>Try deleting the PVC and notice what happens. </summary>
   
     ```bash
     k get pvc
@@ -3327,7 +3328,7 @@
     </details>
 
 16. <details>
-    <summary>Create a </summary>
+    <summary>Why is the PVC stuck in Terminating state?</summary>
   
     ```bash
     k describe pvc claim-log-1
@@ -3336,7 +3337,7 @@
     </details>
 
 17. <details>
-    <summary>Create a </summary>
+    <summary>Let us now delete the webapp Pod. </summary>
   
     ```bash
     k delete pod webapp
@@ -3345,7 +3346,7 @@
     </details>
 
 18. <details>
-    <summary>Create a </summary>
+    <summary>What is the state of the PVC now?</summary>
   
     ```bash
     k get pvc 
@@ -3354,7 +3355,7 @@
     </details>
 
 19. <details>
-    <summary>Create a </summary>
+    <summary>What is the state of the Persistent Volume now?</summary>
   
     ```bash
     k get pv 
@@ -3364,7 +3365,7 @@
 
 ## Practice Test - Storage Class
 1. <details>
-    <summary>Create a </summary>
+    <summary>How many StorageClasses exist in the cluster right now? </summary>
   
     ```bash
     k get storageclass
@@ -3374,7 +3375,7 @@
     </details>
 
 2. <details>
-    <summary>Create a </summary>
+    <summary>How about now? How many Storage Classes exist in the cluster? </summary>
   
     ```bash
     k get sc 
@@ -3383,7 +3384,7 @@
     </details>
 
 6. <details>
-    <summary>Create a </summary>
+    <summary>Let's fix that. Create a new PersistentVolumeClaim by the name of local-pvc that should bind to the volume local-pv. </summary>
   
     ```bash
     k get pv
@@ -3393,7 +3394,7 @@
     </details>
 
 7. <details>
-    <summary>Create a </summary>
+    <summary>Let's fix that. Create a new PersistentVolumeClaim by the name of local-pvc that should bind to the volume local-pv. </summary>
   
     ```bash
     # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
@@ -3405,7 +3406,7 @@
     </details>
 
 8. <details>
-    <summary>Create a </summary>
+    <summary>What is the status of the newly created Persistent Volume Claim?</summary>
   
     ```bash
     k get pvc 
@@ -3414,7 +3415,7 @@
     </details>
 
 9. <details>
-    <summary>Create a </summary>
+    <summary>Why is the PVC in a pending state despite making a valid request to claim the volume called local-pv?</summary>
   
     ```bash
     k describe pvc local-pvc 
@@ -3423,7 +3424,7 @@
     </details>
 
 11. <details>
-    <summary>Create a </summary>
+    <summary>Create a new pod called nginx with the image nginx:alpine. The Pod should make use of the PVC local-pvc and mount the volume at the path /var/www/html. </summary>
   
     ```bash
     k run nginx --image=ngix:alpine --dry-run=client -o yaml
@@ -3435,7 +3436,7 @@
     </details>
 
 12. <details>
-    <summary>Create a </summary>
+    <summary>What is the status of the local-pvc Persistent Volume Claim now? </summary>
   
     ```bash
     k get pvc
@@ -3445,7 +3446,7 @@
 
 > N
 13. <details>
-    <summary>Create a </summary>
+    <summary>Create a new Storage Class called delayed-volume-sc that makes use of the below specs: </summary>
   
     ```bash
     # https://kubernetes.io/docs/concepts/storage/storage-classes/
@@ -3456,3 +3457,131 @@
   
     </details>
 
+# Networking
+## Practice Test - Explore Env
+1. <details>
+    <summary>How many nodes are part of this cluster? </summary>
+  
+    ```bash
+    k get nodes
+    ```
+  
+    </details>
+
+2. <details>
+    <summary>What is the Internal IP address of the controlplane node in this cluster? </summary>
+  
+    ```bash
+    ifconfig -a 
+    cat /etc/network/interfaces
+    ifconfig eth0
+    ```
+  
+4. <details>
+    <summary>What is the MAC address of the interface on the controlplane node? </summary>
+  
+    ```bash
+    ip link
+    ```
+
+    </details>
+
+5. <details>
+    <summary>What is the IP address assigned to node01? </summary>
+  
+    ```bash
+    ssh node01 ifconfig eth0
+    ```
+
+    </details>
+
+6. <details>
+    <summary>What is the MAC address assigned to node01? </summary>
+  
+    ```bash
+    ssh node01 ifconfig eth0
+    ```
+
+    </details>
+
+8. <details>
+    <summary>What is the state of the interface cni0? </summary>
+  
+    ```bash
+    ssh node01 ip link
+    ```
+
+    </details>
+
+9. <details>
+    <summary>If you were to ping google from the controlplane node, which route does it take? </summary>
+  
+    ```bash
+    ip r
+    ```
+
+    </details>
+
+10. <details>
+    <summary>What is the port the kube-scheduler is listening on in the controlplane node? </summary>
+  
+    ```bash
+    netstat -natulp |grep kube-scheduler
+    ```
+
+    </details>
+
+11. <details>
+    <summary>Notice that ETCD is listening on two ports. Which of these have more client connections established? </summary>
+  
+    ```bash
+    netstat -natulp |grep etcd | grep LISTEN
+    ```
+
+    </details>
+
+## Practice Test - CNI weave
+1. <details>
+    <summary>Inspect the kubelet service and identify the container runtime endpoint value is set for Kubernetes. </summary>
+  
+    ```bash
+    ps aux | grep kubelet 
+    ```
+
+    </details>
+
+2. <details>
+    <summary>What is the path configured with all binaries of CNI supported plugins? </summary>
+  
+    ```bash
+    ls /opt/cni/bin/
+    ```
+
+    </details>
+
+3. <details>
+    <summary>Identify which of the below plugins is not available in the list of available CNI plugins on this host? </summary>
+  
+    ```bash
+    ls /opt/cni/bin/
+    ```
+
+    </details>
+
+4. <details>
+    <summary>What is the CNI plugin configured to be used on this kubernetes cluster? </summary>
+  
+    ```bash
+    ls /etc/cni/net.d/
+    ```
+
+    </details>
+
+5. <details>
+    <summary>What is the CNI plugin configured to be used on this kubernetes cluster? </summary>
+  
+    ```bash
+    cat /etc/cni/net.d/10-flannel.conflist
+    ```
+
+    </details>
