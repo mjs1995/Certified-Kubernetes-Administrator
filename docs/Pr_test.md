@@ -38,6 +38,10 @@
 [Day16-Persistent Volume Claims](#practice-test---persistent-volume-claims)<br>
 [Day16-Storage Class](#practice-test---storage-class)<br>
 [Day17-Explore Env](#practice-test---explore-env)<br>
+[Day18-CNI weave](#practice-test---cni-weave)<br>
+[Day18-Deploy Networking Solution](#practice-test---deploy-networking-solution)<br>
+[Day18-Networking Weave](#practice-test---networking-weave)<br>
+[Day18-Service Networking](#practice-test---service-networking)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -3584,4 +3588,325 @@
     cat /etc/cni/net.d/10-flannel.conflist
     ```
 
+    </details>
+
+## Practice Test - Deploy Networking Solution
+1. <details>
+    <summary>In this practice test we will install weave-net POD networking solution to the cluster. Let us first inspect the setup. </summary>
+  
+    ```bash
+    k get pods 
+    ```
+
+    </details>
+
+2. <details>
+    <summary>Inspect why the POD is not running. </summary>
+  
+    ```bash
+    k describe pod app
+    ```
+
+    </details>
+
+> H
+3. <details>
+    <summary>Deploy weave-net networking solution to the cluster. </summary>
+  
+    ```bash
+    # https://www.weave.works/docs/net/latest/kubernetes/kube-addon/#-installation
+    kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
+    kubectl apply -f /root/weave/weave-daemonset-k8s.yaml
+    k get pods -n kube-system
+    ```
+
+    </details>
+
+## Practice Test - Networking Weave
+1. <details>
+    <summary>How many Nodes are part of this cluster? </summary>
+  
+    ```bash
+    k get nodes
+    ```
+
+    </details>
+
+2. <details>
+    <summary>What is the Networking Solution used by this cluster? </summary>
+  
+    ```bash
+    ps aux | grep kubelet
+    ls /etc/cni/net.d/10-weave.conflist 
+    ```
+
+    </details>
+
+3. <details>
+    <summary>What is the Networking Solution used by this cluster? </summary>
+  
+    ```bash
+    k get pods -n kube-system
+    ```
+
+    </details>
+
+4. <details>
+    <summary>On which nodes are the weave peers present? </summary>
+  
+    ```bash
+    k get pods -n kube-system -o wide
+    ```
+
+    </details>
+
+5. <details>
+    <summary>Identify the name of the bridge network/interface created by weave on each node. </summary>
+  
+    ```bash
+    ip link 
+    ssh node01
+    ip link 
+    ```
+
+6. <details>
+    <summary>What is the POD IP address range configured by weave? </summary>
+  
+    ```bash
+    k get pods -n kube-system
+    k logs -n kube-system weave-net-mvrw7 weave
+    ```
+
+    </details>
+
+> H
+7. <details>
+    <summary>What is the default gateway configured on the PODs scheduled on node01? </summary>
+  
+    ```bash
+    k run busybox --image=busybox --dry-run=client -o yaml -- sleep 1000
+    k run busybox --image=busybox --dry-run=client -o yaml -- sleep 1000 > busybox.yaml
+    vi busybox.yaml 
+    k create -f busybox.yaml 
+    k get pod -o wide 
+    k exec busybox -- route -n 
+    k exec busybox -- ip route
+    ```
+
+    </details>
+
+## Practice Test - Service Networking
+1. <details>
+    <summary>What network range are the nodes in the cluster part of? </summary>
+  
+    ```bash
+    k get nodes -o wide 
+    ip a 
+    ```
+
+    </details>
+
+2. <details>
+    <summary>What is the range of IP addresses configured for PODs on this cluster? </summary>
+  
+    ```bash
+    k -n kube-system get pods 
+    k -n kube-system logs weave-net-9m99f -c weave
+    ```
+
+    </details>
+
+3. <details>
+    <summary>What is the IP Range configured for the services within the cluster? </summary>
+  
+    ```bash
+    cd /etc/kubernetes/manifests/
+    cat kube-apiserver.yaml 
+    ```
+
+    </details>
+
+4. <details>
+    <summary>How many kube-proxy pods are deployed in this cluster? </summary>
+  
+    ```bash
+    k -n kube-system get pods 
+    ```
+
+    </details>
+
+5. <details>
+    <summary>What type of proxy is the kube-proxy configured to use? </summary>
+  
+    ```bash
+    k -n kube-system get pods
+    k -n kube-system logs kube-proxy-5l84j
+    ```
+
+    </details>
+
+> N
+6. <details>
+    <summary>How does this Kubernetes cluster ensure that a kube-proxy pod runs on all nodes in the cluster? </summary>
+  
+    ```bash
+    k -n kube-system get ds 
+    ```
+
+    </details>
+
+## Practice Test - CoreDNS in Kubernetes
+1. <details>
+    <summary>Identify the DNS solution implemented in this cluster. </summary>
+  
+    ```bash
+    k get pods -n kube-system
+    ```
+   
+    </details>
+
+2. <details>
+    <summary>How many pods of the DNS server are deployed? </summary>
+  
+    ```bash
+    k get pods -n kube-system
+    ```
+   
+    </details>
+
+3. <details>
+    <summary>What is the name of the service created for accessing CoreDNS? </summary>
+  
+    ```bash
+    k get svc -n kube-system
+    ```
+   
+    </details>
+
+4. <details>
+    <summary>What is the IP of the CoreDNS server that should be configured on PODs to resolve services? </summary>
+  
+    ```bash
+    k get svc -n kube-system
+    ```
+   
+    </details>
+
+5. <details>
+    <summary>Where is the configuration file located for configuring the CoreDNS service? </summary>
+  
+    ```bash
+    k get pods -n kube-system
+    k describe pod coredns-787d4945fb-42xp9 -n kube-system
+    ```
+   
+    </details>
+
+6. <details>
+    <summary>How is the Corefile passed into the CoreDNS POD? </summary>
+  
+    ```bash
+    k get pods -n kube-system
+    k describe pod coredns-787d4945fb-42xp9 -n kube-system
+    k get pod coredns-787d4945fb-42xp9 -n kube-system -o yaml
+    ```
+   
+    </details>
+
+7. <details>
+    <summary>What is the name of the ConfigMap object created for Corefile? </summary>
+  
+    ```bash
+    k get pod coredns-787d4945fb-42xp9 -n kube-system -o yaml
+    ```
+   
+    </details>
+
+> N
+8. <details>
+    <summary>What is the root domain/zone configured for this kubernetes cluster? </summary>
+  
+    ```bash
+    k get configmap -n kube-system 
+    k describe configmap coredns -n kube-system
+    ```
+   
+    </details>
+
+9. <details>
+    <summary>We have deployed a set of PODs and Services in the default and payroll namespaces. Inspect them and go to the next question. </summary>
+  
+    ```bash
+    k get pods 
+    k get pods -n payroll
+    ```
+   
+    </details>
+
+10. <details>
+    <summary>What name can be used to access the hr web server from the test Application? </summary>
+  
+    ```bash
+    k get svc 
+    k describe svc web-service
+    ```
+   
+    </details>
+
+11. <details>
+    <summary>Which of the names CANNOT be used to access the HR service from the test pod? </summary>
+  
+    ```bash
+    k get svc 
+    k describe svc web-service
+    ```
+   
+    </details>
+
+12. <details>
+    <summary>Which of the below name can be used to access the payroll service from the test application? </summary>
+  
+    ```bash
+    k get pod -n payroll
+    k get svc -n payroll
+    k describe svc web-service -n payroll
+    ```
+   
+    </details>
+
+13. <details>
+    <summary>Which of the below name CANNOT be used to access the payroll service from the test application? </summary>
+  
+    ```bash
+    k get pod -n payroll
+    k get svc -n payroll
+    k describe svc web-service -n payroll
+    ```
+   
+    </details>
+
+> H
+14. <details>
+    <summary>We just deployed a web server - webapp - that accesses a database mysql - server. However the web server is failing to connect to the database server. Troubleshoot and fix the issue. </summary>
+  
+    ```bash
+    k get deploy
+    k get pods -A 
+    k get svc -n payroll
+    k describe deploy webapp
+    k edit deploy webapp # mysql.payroll
+    k get pods 
+    ```
+   
+    </details>
+
+> H
+15. <details>
+    <summary>From the hr pod nslookup the mysql service and redirect the output to a file /root/CKA/nslookup.out </summary>
+  
+    ```bash
+    k exec hr -- nslookup mysql.payroll
+    k exec hr -- nslookup mysql.payroll > /root/CKA/nslookup.out
+    ```
+   
     </details>
