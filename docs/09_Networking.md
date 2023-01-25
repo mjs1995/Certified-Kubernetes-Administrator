@@ -1,6 +1,7 @@
 # study
 - [Day16](#linux-networking-basics)<br>
 - [Day17](#dns)<br>
+- [Day18](#cni-in-kubernetes)<br>
 
 # Linux Networking Basics
 - Networking Pre-Requisites
@@ -220,3 +221,62 @@
   - > kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
   - > kubectl get pods –n kube-system
   - > kubectl logs weave-net-5gcmb weave –n kube-system
+
+# IPAM
+- IP 주소 관리 
+- ![image](https://user-images.githubusercontent.com/47103479/214561785-62b61fb7-2e8a-4622-87fd-889d4fcb2cd1.png)
+  - CNI는 컨테이너에 IP 할당하고 관리할 네트워크 솔루션 공급자인 CNI 플러그인의 책임이라고 말합니다. 표준을 정의하는 사람들입니다. 
+  - ![image](https://user-images.githubusercontent.com/47103479/214562064-ac822484-f9d0-4066-ae0b-533988183b11.png)
+  - ![image](https://user-images.githubusercontent.com/47103479/214562111-ea283ef8-cfe1-440a-848a-946df2817f7c.png)
+  - > cat /etc/cni/net.d/net-script.conf : ipam  섹션 확인(사용할 플러그인 유형 지정)  
+- Weave는 기본적으로 IP 범위 10.32.0.0/12를 할당합니다.
+
+# Service Networking 
+- 클러스터 IP : 클러스터 내에서만 액세스할 수 있습니다
+- ![image](https://user-images.githubusercontent.com/47103479/214565732-6df4f9d2-33d4-495d-a6e4-41b964a6c606.png)
+- 서비스 객체를 생성할 때 쿠버네티스에서 미리 정의된 범위에서 IP 주소가 할당됩니다.
+- > kube-proxy --proxy-mode [userspace | iptablkes | ipvs ] …
+- > kubelet get pods -o wide
+- > kubelet get service
+- > kube-api-server --service-cluster-ip-range ipNet (Default: 10.0.0.0/24) : 클러스터 IP 범위 
+- > ps aux | grep kube-api-server
+- > iptables –L –t net | grep db-service
+- > cat /var/log/kube-proxy.log
+
+# Cluster DNS
+- Objectives
+  - What names are assigned to what objects?
+  - Service DNS records
+  - POD DNS Recrods
+- ![image](https://user-images.githubusercontent.com/47103479/214570780-edecb350-2149-4eba-8ce7-1a8bc32021a8.png)
+  - 서비스가 생성될 때마다 Kubernetes DNS 서비스는 서비스에 대한 레코드를 만듭니다. 서비스 이름을 IP 주소에 매핑합니다.
+- ![image](https://user-images.githubusercontent.com/47103479/214571414-1b8dff10-31a8-4fde-8b53-ffcd54fc0d95.png)
+  - 모든 서비스는 SVC라는 다른 하위 도메인으로 함께 그룹화됩니다.
+  - 모든 서비스와 포드가 클러스터의 경로 도메인으로 함께 그룹화됩니다.
+
+# How Kubernetes Implements DNS 
+- ![image](https://user-images.githubusercontent.com/47103479/214571838-a1e80178-9acd-46a5-8fd3-d6d24aa50c09.png)
+  - 서로 해결하는 쉬운 방법 각각의 etc 호스트 파일에 항목을 추가하는 것입니다. 수천 개의 포드가 있는 경우 적합하지 않음 
+  - 다른 포드가 새 포드에 액세스할 수 있도록 포드에서 etc resolv.conf 파일을 구성하여 DNS 서버를 가리키도록 합니다.
+- CoreDNS
+  - ![image](https://user-images.githubusercontent.com/47103479/214572788-82e8336e-1a89-4985-8593-1f9131f462d0.png)   
+  - coreDNS 서버는 Kubernetes 클러스터의 Kube 시스템 네임스페이스에서 포드로 배포됩니다.  
+  - 복제 세트의 일부로 중복성을 위해 두 개의 팟(Pod)으로 배포됩니다.
+  - CoreDNS에는 구성 파일이 필요합니다. 플러그인은 상태 보고, 지표 모니터링, 현금 등 오류를 처리하도록 구성되어 있습니다.
+  - > kubectl get configmap –n kube-system
+  - ![image](https://user-images.githubusercontent.com/47103479/214573025-fd70fcd0-3164-47d2-9add-41dd855db98d.png)
+  - > kubectl get service –n kube-sytem
+  - > cat /var/lib/kubelet/config.yaml
+  - ![image](https://user-images.githubusercontent.com/47103479/214573309-357e3361-0c72-48a5-9abc-c5ab8da695f8.png)
+  - ![image](https://user-images.githubusercontent.com/47103479/214594944-32f14d11-e6c8-4847-b9e0-bc0b6949b443.png)
+
+# Ingress
+- ![image](https://user-images.githubusercontent.com/47103479/214595618-332e6b76-a9d6-4cb2-84b9-227f983c787a.png)
+  - 각 로드 밸런서에 대해 비용을 지불해야 합니다. 이러한 로드 밸런서를 많이 보유하면 역으로 클라우드 청구서에 영향을 미칩니다.
+- ![image](https://user-images.githubusercontent.com/47103479/214595938-a60e95c5-bb79-42a3-9513-d6ca6922c5de.png)
+  - Ingress는 다른 서비스로 라우팅하도록 구성할 수 있는 외부에서 액세스할 수 있는 단일 URL 사용하여 사용자가 애플리케이션에 액세스하도록 돕습니다.
+- 배포하는 솔루션을 Ingress 컨트롤러, 세트를 구성하는 규칙 중 인그레스 리소스라고 함.인그레스 리소스는 정의 파일을 사용하여 생성됩니다.
+- Ingress Controller
+  - ![image](https://user-images.githubusercontent.com/47103479/214596367-8daf9b4e-6702-435b-8749-5a459b055461.png)
+  - NGINX, Contour, HAProxy, Traefik, Astel 
+  - ![image](https://user-images.githubusercontent.com/47103479/214597200-14b2f91b-b69d-4d69-99df-83bf4a7897d5.png)
