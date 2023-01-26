@@ -42,6 +42,8 @@
 [Day18-Deploy Networking Solution](#practice-test---deploy-networking-solution)<br>
 [Day18-Networking Weave](#practice-test---networking-weave)<br>
 [Day18-Service Networking](#practice-test---service-networking)<br>
+[Day19-CoreDNS in Kubernetes](#practice-test---coredns-in-kubernetes)<br>
+[Day19-Ingress Networking 1](#practice-test---ingress-networking-1)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -3910,3 +3912,281 @@
     ```
    
     </details>
+
+## Practice Test - Ingress Networking 1
+1. <details>
+    <summary>We have deployed Ingress Controller, resources and applications. Explore the setup. </summary>
+  
+    ```bash
+    k get nodes
+    k get deploy 
+    k get deploy -A
+    k get pods -n kube-system 
+    k get pods -n ingress-nginx 
+    ```
+   
+    </details>
+
+2. <details>
+    <summary>Which namespace is the Ingress Controller deployed in? </summary>
+  
+    ```bash
+    k get pods -A 
+    ```
+   
+    </details>
+
+3. <details>
+    <summary>What is the name of the Ingress Controller Deployment? </summary>
+  
+    ```bash
+    k get pods -A 
+    k get deploy -n ingress-nginx
+    ```
+   
+    </details>
+
+4. <details>
+    <summary>Which namespace are the applications deployed in? </summary>
+  
+    ```bash
+    k get pods -A 
+    ```
+   
+    </details>
+
+5. <details>
+    <summary>How many applications are deployed in the app-space namespace? </summary>
+  
+    ```bash
+    k get pods -A 
+    ```
+   
+    </details>
+
+6. <details>
+    <summary>Which namespace is the Ingress Resource deployed in? </summary>
+  
+    ```bash
+    k get ingress -A
+    ```
+   
+    </details>
+
+7. <details>
+    <summary>What is the name of the Ingress Resource? </summary>
+  
+    ```bash
+    k get ingress -A
+    ```
+   
+    </details>
+
+8. <details>
+    <summary>What is the Host configured on the Ingress Resource? </summary>
+  
+    ```bash
+    k get ingress -A
+    ```
+   
+    </details>
+
+9. <details>
+    <summary>What backend is the /wear path on the Ingress configured with? </summary>
+  
+    ```bash
+    k describe ingress ingress-wear-watch -n app-space
+    ```
+   
+    </details>
+
+10. <details>
+    <summary>At what path is the video streaming application made available on the Ingress? </summary>
+  
+    ```bash
+    k describe ingress ingress-wear-watch -n app-space
+    ```
+   
+    </details>
+
+11. <details>
+    <summary>If the requirement does not match any of the configured paths what service are the requests forwarded to? </summary>
+  
+    ```bash
+    k describe ingress ingress-wear-watch -n app-space
+    ```
+   
+    </details>
+
+12. <details>
+    <summary>Now view the Ingress Service using the tab at the top of the terminal. Which page do you see? </summary>
+  
+    ```bash
+    k describe ingress ingress-wear-watch -n app-space
+    ```
+   
+    </details>
+
+14. <details>
+    <summary>You are requested to change the URLs at which the applications are made available. </summary>
+  
+    ```bash
+    k edit ingress ingress-wear-watch -n app-space
+    ```
+   
+    </details>
+
+16. <details>
+    <summary>A user is trying to view the /eat URL on the Ingress Service. Which page would he see? </summary>
+  
+    ```bash
+    k describe ingress ingress-wear-watch -n app-space
+    ```
+   
+    </details>
+
+17. <details>
+    <summary>Due to increased demand, your business decides to take on a new venture. You acquired a food delivery company. Their applications have been migrated over to your cluster. </summary>
+  
+    ```bash
+    k get deploy -n app-space 
+    ```
+   
+    </details>
+
+18. <details>
+    <summary>You are requested to add a new path to your ingress to make the food delivery application available to your customers. </summary>
+  
+    ```bash
+    k get svc -n app-space 
+    k edit ingress ingress-wear-watch -n app-space
+    ```
+   
+    </details>
+
+20. <details>
+    <summary>A new payment service has been introduced. Since it is critical, the new application is deployed in its own namespace. </summary>
+  
+    ```bash
+    k get pods -A 
+    k get deploy -n critical-space 
+    ```
+   
+    </details>
+
+21. <details>
+    <summary>What is the name of the deployment of the new application? </summary>
+  
+    ```bash
+    k get pods -A 
+    k get deploy -n critical-space 
+    ```
+   
+    </details>
+
+> H
+22. <details>
+    <summary>You are requested to make the new application available at /pay. </summary>
+  
+    ```bash
+    k get svc -n critical-space 
+    k create ingress -h
+    k create ingress ingress-pay -n critical-space --rule="/pay=pay-service:8282"
+    k get ingress -n critical-space
+    k describe ingress -n critical-space
+    k get pods -n critical-space 
+    k logs webapp-pay-58cdc69889-v7mk4 -n critical-space
+    k edit ingress ingress-pay -n critical-space 
+    # annotations:
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+    ```
+   
+    </details>
+
+## Practice Test - Ingress Networking 2
+1. <details>
+    <summary>We have deployed two applications. Explore the setup. </summary>
+  
+    ```bash
+    k get pod -A 
+    ```
+   
+    </details>
+
+2. <details>
+    <summary>Let us now deploy an Ingress Controller. First, create a namespace called ingress-nginx. </summary>
+  
+    ```bash
+    k create namespace ingress-nginx
+    ```
+   
+    </details>
+
+3. <details>
+    <summary>The NGINX Ingress Controller requires a ConfigMap object. Create a ConfigMap object with name ingress-nginx-controller in the ingress-nginx namespace. </summary>
+  
+    ```bash
+    k create configmap ingress-nginx-controller -n ingress-nginx
+    ```
+   
+    </details>
+
+4. <details>
+    <summary>The NGINX Ingress Controller requires two ServiceAccounts. Create both ServiceAccount with name ingress-nginx and ingress-nginx-admission in the ingress-nginx namespace. </summary>
+  
+    ```bash
+    k create serviceaccount ingress-nginx -n ingress-nginx
+    k create serviceaccount ingress-nginx-admission -n ingress-nginx
+    ```
+   
+    </details>
+
+5. <details>
+    <summary>We have created the Roles and RoleBindings for the ServiceAccount. Check it out!! </summary>
+  
+    ```bash
+    k get roles -n ingress-nginx
+    k get rolebindings -n ingress-nginx
+    k describe role ingress-nginx -n ingress-nginx
+    ```
+   
+    </details>
+
+> H
+6. <details>
+    <summary>Let us now deploy the Ingress Controller. Create the Kubernetes objects using the given file. </summary>
+  
+    ```bash
+    cat ingress-controller.yaml 
+    k create -f ingress-controller.yaml 
+    vi ingress-controller.yaml 
+    k get pods -n ingress-nginx
+    k get deploy -n ingress-nginx
+    k expose deploy ingress-controller -n ingress-nginx --name ingress --port=80 --target -port=80 --type NodePort 
+    k get svc -n ingress-nginx 
+    k edit svc ingress -n ingress-nginx # 30080
+    ```
+   
+    </details>
+
+> H
+7. <details>
+    <summary>Create the ingress resource to make the applications available at /wear and /watch on the Ingress service. </summary>
+  
+    ```bash
+    k create ingress ingress-wear-watch -n app-space --rule="/wear=wear-service:8080" --rule="/watch=video-service:8080"
+    k get svc -n app-space
+    k get ingress -n app-space 
+    k describe ingress -n app-space
+    k get pods -n app-space
+    k logs webapp-video-57cddcc65-67bzk -n app-space
+    k get pods -n ingress-nginx
+    k logs ingress-nginx-admission-create-kc9v6 -n ingress-nginx
+    k edit ingress ingress-wear-watch -n app-space
+    #annotations:
+      # nginx.ingress.kubernetes.io/rewrite-target: /
+      # nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    ```
+   
+    </details>
+
