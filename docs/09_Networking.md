@@ -2,6 +2,7 @@
 - [Day16](#linux-networking-basics)<br>
 - [Day17](#dns)<br>
 - [Day18](#cni-in-kubernetes)<br>
+- [Day19](#cluster-dns)<br>
 
 # Linux Networking Basics
 - Networking Pre-Requisites
@@ -280,3 +281,19 @@
   - ![image](https://user-images.githubusercontent.com/47103479/214596367-8daf9b4e-6702-435b-8749-5a459b055461.png)
   - NGINX, Contour, HAProxy, Traefik, Astel 
   - ![image](https://user-images.githubusercontent.com/47103479/214597200-14b2f91b-b69d-4d69-99df-83bf4a7897d5.png)
+- Ingress Resource
+  - 인그레스 리소스는 Ingress 컨트롤러에 적용된 구성으로 규칙 집합입니다.
+  - ![image](https://user-images.githubusercontent.com/47103479/214830893-784a7ea1-ad35-4408-b3ef-18eb410c714b.png)
+  - > kubectl create –f Ingress-wear.yaml
+  - > kubectl get ingress
+  - ![image](https://user-images.githubusercontent.com/47103479/214831636-374af6f1-0c96-4d6c-8a94-acf090b6041c.png)
+  - > kubectl describe ingress ingress-wear-watch
+- ![image](https://user-images.githubusercontent.com/47103479/214832280-0f3d53d5-b238-4ae7-9abd-c0ca35f7dc2e.png)
+  - > Format - kubectl create ingress <ingress-name> --rule="host/path=service:port"
+  - > Example - kubectl create ingress ingress-test --rule="wear.my-online-store.com/wear*=wear-service:80"
+- > http://<ingress-service>:<ingress-port>/watch-->http://<watch-service>:<port>/
+- > http://<ingress-service>:<ingress-port>/wear-->http://<wear-service>:<port>/
+- > http://<ingress-service>:<ingress-port>/watch-->http://<watch-service>:<port>/watch
+- > http://<ingress-service>:<ingress-port>/wear-->http://<wear-service>:<port>/wear
+  - ![image](https://user-images.githubusercontent.com/47103479/214838086-96ae51a6-a969-41d2-97f9-3d8d98373744.png)
+  - ![image](https://user-images.githubusercontent.com/47103479/214838113-8466c8d8-c617-422e-b419-3ba2f8b0d465.png)
