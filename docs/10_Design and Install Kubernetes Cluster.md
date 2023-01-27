@@ -1,4 +1,5 @@
 # study
+- [Day20](#design-a-kubernetes-cluter)<br>
 
 # Design a kubernetes cluter
 - 목적
@@ -21,3 +22,70 @@
   - 마스터 노드가 제어 구성요소 호스팅용으로 CD 서버 및 기타의 QAP 서버와 같습니다.마스터 노드도 노드로 간주되어 워크로드를 호스팅할 수 있습니다.
     - ![image](https://user-images.githubusercontent.com/47103479/214868725-059d9c4b-a609-4630-8554-bd32de909c60.png)
   - 작업자 노드는 워크로드를 호스팅하기 위한 것입니다.
+
+# Choosing Kubernetes Infrastructure
+- ![image](https://user-images.githubusercontent.com/47103479/215083376-37ded4e4-9f47-4023-a4f0-ab6993e67162.png)
+  - Minikube는 오라클 워크샵 상자처럼 가상화 소프트웨어 중 하나에 의존하여 단일 노드 클러스터를 쉽게 배포합니다.
+  - kubeadm 도구를 사용하여 배포할 수 있습니다. 단일 노드 또는 다중 노드 클러스터가 정말 빠릅니다. 하지만 이를 위해서는 지원되는 구성으로 직접 필수 호스트를 프로비저닝해야 합니다.
+- ![image](https://user-images.githubusercontent.com/47103479/215083911-bfbde812-504c-4f43-8a07-c20c59822292.png)
+  - Turnkey Solutions
+    - 턴키 솔루션은 필요한 VM을 프로비저닝하는 곳입니다. 도구나 스크립트를 사용합니다.
+    - ![image](https://user-images.githubusercontent.com/47103479/215084017-417cb39a-ec96-43b4-b2c6-dbc23625a2a4.png)
+    - OpenShift는 오픈 소스 컨테이너 애플리케이션 플랫폼으로 Kubernetes 위에 구축되었습니다.
+    - Cloud Foundry Container Runtime은 OpenSource 프로젝트입니다. 배포에 도움이 되는 Cloud Foundry에서 고가용성 Kubernetes 클러스터 관리,.Bosch라는 오픈 소스 도구를 사용합니다.
+    - 기존 VMware 환경을 활용하려는 경우 Kubernetes의 경우 VMware Cloud PKS 솔루션
+    - Vagrant는 유용한 스크립트 세트를 제공합니다.
+  - Hosted Solutions
+    - 호스팅 솔루션은 Kubernetes와 비슷합니다. 클러스터가 서비스 솔루션으로 필수 VM과 함께 공급자가 배포하고 Kubernetes는 공급자가 구성합니다.
+    - ![image](https://user-images.githubusercontent.com/47103479/215084416-b6f82ded-5375-48c9-bf5b-56f610bc6bbe.png)
+    - Google Container Engine은 매우 인기 있는 Kubernetes입니다. Google Cloud Platform에서 서비스로 제공됩니다.
+    - OpenShift 온라인은 오퍼링입니다. 온전한 기능을 갖춘 Kubernetes 클러스터에 온라인으로 Red Hat에서 액세스 권한을 얻었습니다.
+    - Azure에는 Azure Kubernetes 서비스가 있습니다. 
+    - Amazon Elastic Container Service for Kubernetes는 Amazon에서 호스팅하는 Kubernetes 제품입니다.
+
+# HA Kubernetes Cluster 
+- ![image](https://user-images.githubusercontent.com/47103479/215087424-21809769-b9d4-4b71-a75a-db0806528f09.png)
+  - 둘중 능동이고 어떤게 수동인지는 리더 선출 프로세스를 통해 달성됩니다.
+  - > kube-controller-manager --leader-elect true [other options] \ --leader-elect-lease-duration 15s \ --leader-elect-renew-deadline 10s \ --leader-elect-retry-period 2s
+- etcd에는 두 가지 토폴로지가 있어 쿠버네티스에서 구성할 수 있음 
+  - ![image](https://user-images.githubusercontent.com/47103479/215088038-075d5e4f-b499-4b76-925c-99d2237c0c85.png)
+    - 스택 컨트롤 플레인 노드 토폴로지
+      - 설정하기 쉽고 관리하기 쉽습니다. 더 적은 노드가 필요합니다.
+      - 한 노드가 모두 다운되면 etcd 멤버 및 컨트롤 플레인 인스턴스가 손실되어 중복성이 손상됩니다.
+  - External ETCD Topology
+      - ![image](https://user-images.githubusercontent.com/47103479/215088092-da63a167-461b-468d-8360-15c65ec8a577.png)
+      - 컨트롤 플레인 노드와 분리되어 자체 서버 세트에서 실행됩니다.
+      - 실패한 컨트롤 플레인 노드로 덜 위험합니다. etcd 클러스터와 저장하는 데이터에는 영향을 미치지 않습니다.
+      - 설정하기가 더 어렵고 외부 etcd 노드용 서버 두 배의 숫자가 필요합니다.
+- ![image](https://user-images.githubusercontent.com/47103479/215088510-d55da752-5877-4931-8588-9205786cf2ed.png)
+  - > cat /etc/systemd/system/kube-apiserver.service
+  - API 서비스 구성 옵션 
+  - etcd는 분산 시스템임으로 API 서버 또는 대화를 원하는 다른 구성 요소, 모든 인스턴스에서 etcd 서버에 도달할 수 있습니다. 사용 가능한 etcd 서버 인스턴스를 통해 데이터를 읽고 쓸 수 있습니다
+- ![image](https://user-images.githubusercontent.com/47103479/215088582-413e18e4-4c1a-48f9-b2ef-37ce9829cc2e.png)
+
+# ETCD In HA 
+- etcd는 분산되고 신뢰할 수 있는 키 값 저장소로 간단하고 안전하며 빠릅니다.
+- 키 값 저장소는 문서 또는 페이지의 형태로 정보를 저장합니다.
+- ![image](https://user-images.githubusercontent.com/47103479/215089948-15979ec8-4630-468e-8287-4b0aff605c08.png)
+  - etcd는 raft 프로토콜을 사용하여 분산 합의를 구현합니다.
+  - 클러스터가 설정되면 리더가 선출되지 않은 세 개의 노드가 있습니다. Raft 알고리즘은 요청을 시작하기 위해 무작위 타이머를 사용합니다.
+- ![image](https://user-images.githubusercontent.com/47103479/215090073-c07da760-6433-4b73-be5e-4d3677b54dab.png)
+  - 쿼럼은 최소 노드 수입니다.
+  - 하나를 잃어도 여전히 정족수를 가질 수 있습니다. 클러스터는 계속 작동합니다.
+  - Fault Tolerance : 첫 번째 열 빼기 두 번째 열은 내결함성, 노드 수를 제공합니다. 클러스터를 활성 상태로 유지하면서 손실을 감당할 수 있습니다.
+  - 마스터 노드 수를 결정할 때, 홀수를 선택하는 것이 좋습니다.
+- ![image](https://user-images.githubusercontent.com/47103479/215090704-523a4921-a0f1-4f2f-94ae-211830b21d9f.png)
+  - 서버에 etcd를 설치하려면, 지원되는 최신 바이너리를 다운로드하고 압축을 풀고 필요한 디렉토리 구조를 만들고 etcd용으로 생성된 인증서 파일을 복사합니다.
+  - > wget -q --https-only \ "https://github.com/coreos/etcd/releases/download/v3.3.9/etcd-v3.3.9-linux-amd64.tar.gz"
+  - > tar -xvf etcd-v3.3.9-linux-amd64.tar.gz
+  - > mv etcd-v3.3.9-linux-amd64/etcd* /usr/local/bin/
+  - > mkdir -p /etc/etcd /var/lib/etcd
+  - > cp ca.pem kubernetes-key.pem kubernetes.pem /etc/etcd/
+  - ![image](https://user-images.githubusercontent.com/47103479/215090809-0093bf67-e7ff-4ada-b7c9-b9edc174a99b.png)
+- ETCDCTL
+  - 설치 및 구성이 완료되면 etcd cuddle 유틸리티를 사용하여 데이터를 저장하고 검색합니다.
+  - etcd cuddle 유틸리티에는 V2 및 V3의 두 가지 API 버전이 있습니다. 따라서 명령은 각 버전에서 다르게 작동합니다. 버전 2가 기본값입니다.
+  - > export ETCDCTL_API=3 : etcdcuddle_api 환경 변수를 3으로 설정합니다.
+  - > etcdctl put name john : etcd cuddle put 명령을 실행하고 키를 지정합니다.
+  - > etcdctl get name : 데이터를 검색하려면 etcd cuddle get 명령을 실행하십시오.
+  - > etcdctl get / --prefix --keys-only : 모든 키를 얻으려면 etcd cuddle get keys only 명령을 실행하십시오.
