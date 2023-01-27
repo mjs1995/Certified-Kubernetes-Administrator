@@ -44,6 +44,7 @@
 [Day18-Service Networking](#practice-test---service-networking)<br>
 [Day19-CoreDNS in Kubernetes](#practice-test---coredns-in-kubernetes)<br>
 [Day19-Ingress Networking 1](#practice-test---ingress-networking-1)<br>
+[Day20-Ingress Networking 2](#practice-test---ingress-networking-2)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -4190,3 +4191,143 @@
    
     </details>
 
+# Install
+## Practice Test - Install kubernetes cluster using kubeadm tool
+> H
+1. <details>
+    <summary>Install the kubeadm and kubelet packages on the controlplane and node01. </summary>
+  
+    ```bash
+    # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+    ssh node01
+    exit 
+    ip addr 
+    sudo cat /sys/class/dmi/id/product_uuid
+    ssh node01
+    ip addr 
+    sudo cat /sys/class/dmi/id/product_uuid
+    exit
+    ping node01 
+    
+    # Letting iptable see bridged traffic
+    cat <<EOF | tee /etc/modules-load.d/k8s.conf
+    br_netfilter
+    EOF
+   
+    cat <<EOF | tee /etc/sysctl.d/k8s.conf
+    net.bridge.bridge-nf-call-ip6tables = 1
+    net.bridge.bridge-nf-call-iptables = 1
+    EOF
+    sysctl --system
+   
+    clear
+    docker ps 
+    service docker status
+    
+    cat /etc/*release*
+    sudo apt-get update 
+    sudo apt-get install -y apt-transport-https ca-certificates curl
+    sudo curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+    echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+    
+    sudo apt-get update
+    sudo apt-get install -y kubelet=1.26.0-00 kubeadm=1.26.0-00 kubectl=1.26.0-00 # 버전 지정
+    sudo apt-mark hold kubelet kubeadm kubectl
+    
+    # 노드01 에도 같은 작업 
+    ssh node01
+    cat <<EOF | tee /etc/modules-load.d/k8s.conf
+    br_netfilter
+    EOF
+   
+    cat <<EOF | tee /etc/sysctl.d/k8s.conf
+    net.bridge.bridge-nf-call-ip6tables = 1
+    net.bridge.bridge-nf-call-iptables = 1
+    EOF
+    sysctl --system
+   
+    service docker status
+    sudo apt-get update 
+    sudo apt-get install -y apt-transport-https ca-certificates curl
+    sudo curl -fsSLo /etc/apt/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+    
+    sudo apt-get update
+    sudo apt-get install -y kubelet=1.26.0-00 kubeadm=1.26.0-00 kubectl=1.26.0-00 # 버전 지정
+    sudo apt-mark hold kubelet kubeadm kubectl
+    ```
+   
+    </details>
+
+2. <details>
+    <summary>What is the version of kubelet installed? </summary>
+  
+    ```bash
+    kublet --version
+    ```
+   
+    </details>
+
+3. <details>
+    <summary>How many nodes are part of kubernetes cluster currently? </summary>
+  
+    ```bash
+    kubectl get nodes
+    ```
+   
+    </details>
+
+> H
+5. <details>
+    <summary>Initialize Control Plane Node (Master Node). Use the following options: </summary>
+  
+    ```bash
+    ip addr 
+    kubeadm init --apiserver-advertise-address 10.13.26.9 --apiserver-cert-extra-sans controlplane pod-network-cidr 10.244.0.0/16
+    mkdir -p $HOME/.kube
+    sudo cp-i /etc/kubernetes/amdin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config 
+    ```
+   
+    </details>
+
+> N
+6. <details>
+    <summary>Generate a kubeadm join token </summary>
+  
+    ```bash
+    kubeadm token create --help 
+    kubeadm token create --print-join-command
+    ```
+   
+    </details>
+
+7. <details>
+    <summary>Join node01 to the cluster using the join token </summary>
+  
+    ```bash
+    ssh node01
+    # kubeadm token create --print-join-command 결과 
+    kubeadm join 10.13.26.9:6443 --token cpwmot.ldhadf3cokvyyx60 \
+    --discovery-token-ca-cert-hash sha256:ea3a622922315b14b289c6efd7b1a77cbf81d29f6ddaf03472c304b6d3228c06
+    ```
+   
+    </details>
+
+> N
+8. <details>
+    <summary>Install a Network Plugin. As a default, we will go with flannel </summary>
+  
+    ```bash
+    kubectl get nodes 
+    # install addons
+    # https://kubernetes.io/docs/concepts/cluster-administration/addons/
+    # https://github.com/flannel-io/flannel#deploying-flannel-manually
+    kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+    kubectl get pods -n kube-system
+    kubectl get pods -n kube-system --watch 
+    kubectl get nodes 
+    ```
+   
+    </details>
