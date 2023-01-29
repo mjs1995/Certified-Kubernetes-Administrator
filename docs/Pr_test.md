@@ -45,6 +45,8 @@
 [Day19-CoreDNS in Kubernetes](#practice-test---coredns-in-kubernetes)<br>
 [Day19-Ingress Networking 1](#practice-test---ingress-networking-1)<br>
 [Day20-Ingress Networking 2](#practice-test---ingress-networking-2)<br>
+[Day21-Install kubernetes cluster using kubeadm tool](#practice-test---install-kubernetes-cluster-using-kubeadm-tool)<br>
+[Day21-Application Failure](#practice-test---application-failure)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -4328,6 +4330,193 @@
     kubectl get pods -n kube-system
     kubectl get pods -n kube-system --watch 
     kubectl get nodes 
+    ```
+   
+    </details>
+
+# Troubleshooting
+## Practice Test - Application Failure
+1. <details>
+    <summary>Troubleshooting Test 1: A simple 2 tier application is deployed in the alpha namespace. It must display a green web page on success. Click on the App tab at the top of your terminal to view your application. It is currently failed. Troubleshoot and fix the issue. </summary>
+  
+    ```bash
+    k get pods -n alpha
+    k config --help 
+    k config set-context --help
+    k config set-context --current --namespace=alpha
+    k get pods 
+    k get deploy
+    k get svc 
+    curl http://localhost:30081
+    k describe deploy webapp-mysql
+    k get svc # 이름 다름
+    k edit svc mysql 
+    cat /tmp/kubectl-edit-3364085288.yaml
+    kubectl delete svc mysql 
+    kubectl create -f /tmp/kubectl-edit-3364085288.yaml
+    k get svc 
+    ```
+   
+    </details>
+
+2. <details>
+    <summary>Troubleshooting Test 2: The same 2 tier application is deployed in the beta namespace. It must display a green web page on success. Click on the App tab at the top of your terminal to view your application. It is currently failed. Troubleshoot and fix the issue. </summary>
+  
+    ```bash
+    k config set-context --current --namespace=beta
+    k get pods 
+    k get svc 
+    k describe deploy webapp-mysql 
+    k describe svc mysql-service 
+    k get pods -o wide  # 데이터 포트가 8080이 아니라 3306
+    k edit svc mysql-service 
+    k get svc 
+    k describe svc mysql-service 
+    ```
+   
+    </details>
+
+3. <details>
+    <summary>Troubleshooting Test 3: The same 2 tier application is deployed in the gamma namespace. It must display a green web page on success. Click on the App tab at the top of your terminal to view your application. It is currently failed or unresponsive. Troubleshoot and fix the issue. </summary>
+  
+    ```bash
+    k config set-context --current --namespace=gamma
+    k get pods 
+    k get svc 
+    k describe svc web-service 
+    k get pods -o wide
+    k describe deploy webapp-mysql
+    k get pods  
+    k logs webapp-mysql-7cc9dcdffd-k4qcj
+    k get svc 
+    k describe svc mysql-service # Endpoints 없음 
+    k describe pod mysql 
+    k edit svc mysql-service  # mysql
+    k describe svc mysql-service 
+    ```
+   
+    </details>
+
+4. <details>
+    <summary>Troubleshooting Test 4: The same 2 tier application is deployed in the delta namespace. It must display a green web page on success. Click on the App tab at the top of your terminal to view your application. It is currently failed. Troubleshoot and fix the issue. </summary>
+  
+    ```bash
+    k config set-context --current --namespace=delta 
+    k get pods 
+    k get svc 
+    k describe deploy webapp-mysql # DB 유저 잘못지정 
+    k edit deploy webapp-mysql # root
+    k get pods 
+    ```
+   
+    </details>
+
+5. <details>
+    <summary>Troubleshooting Test 5: The same 2 tier application is deployed in the epsilon namespace. It must display a green web page on success. Click on the App tab at the top of your terminal to view your application. It is currently failed. Troubleshoot and fix the issue. </summary>
+  
+    ```bash
+    k config set-context --current --namespace=epsilon 
+    k get pods 
+    k get svc 
+    k describe deploy webapp-mysql # DB 유저 잘못지정 
+    k edit deploy webapp-mysql # root
+    k get pods 
+    k describe pod mysql
+    k edit pod mysql # pwd 수정 
+    k replace --force -f /tmp/kubectl-edit-2404243763.yaml
+    k get pods 
+    ```
+   
+    </details>
+
+6. <details>
+    <summary>Troubleshooting Test 6: The same 2 tier application is deployed in the zeta namespace. It must display a green web page on success. Click on the App tab at the top of your terminal to view your application. It is currently failed. Troubleshoot and fix the issue. </summary>
+  
+    ```bash
+    k config set-context --current --namespace=zeta
+    k get svc # 30081이 아닌 30088
+    k edit svc web-service 
+    k get svc 
+    k describe deploy webapp-mysql
+    k edit deploy webapp-mysql # root 
+    k get pods 
+    k desribe mysql  # pwd 이슈
+    k edit pod mysql # pwd 수정 
+    k replace --force -f /tmp/kubectl-edit-3569412833.yaml
+    k get pods 
+    ```
+   
+    </details>
+## Practice Test - Control Plane Failure
+1. <details>
+    <summary>The cluster is broken. We tried deploying an application but it's not working. Troubleshoot and fix the issue. </summary>
+  
+    ```bash
+    # source <(kubectl completion bash) <- 자동완성 기능 
+    alias k=kubectl 
+    kubectl get n
+    k get deploy
+    k describe deploy 
+    k get rs 
+    k describe rs app-865fdf7bbf
+    k get pod 
+    k describe pod app-865fdf7bbf # pending status , 포드가 할당 안되었음. 노드와 작업에
+    k get pods -n kube-system 
+    k describe pod -n kube-system kube-scheduler-controlplane
+    cat /etc/kubernetes/manifests/kube-scheduler.yaml 
+    vi /etc/kubernetes/manifests/kube-scheduler.yaml 
+    k get pods -n kube-system --watch 
+    k logs kube-scheduler-controlplane -n kube-system
+    k get pods 
+    k get deploy
+    ```
+   
+    </details>
+
+2. <details>
+    <summary>Scale the deployment app to 2 pods. </summary>
+  
+    ```bash
+    k get deploy
+    k scale deploy app --replicas=2
+    k get deploy
+    ```
+   
+    </details>
+
+3. <details>
+    <summary>Even though the deployment was scaled to 2, the number of PODs does not seem to increase. Investigate and fix the issue. </summary>
+  
+    ```bash
+    k get pods 
+    k describe deploy app 
+    k get pods -n kube-system
+    k describe -n kube-system pods kube-controller-manager-controlplane
+    k logs kube-controller-manager-controlplane -n kube-system
+    cat /etc/kubernetes/manifests/kube-controller-manager-controlplane.yaml 
+    cat /etc/kubernetes/controller-manager.conf 
+    vi /etc/kubernetes/manifests/kube-controller-manager.yaml 
+    k get pods -n kube-system --watch
+    k get pods 
+    k get deploy 
+    ```
+   
+    </details>
+
+4. <details>
+    <summary>Something is wrong with scaling again. We just tried scaling the deployment to 3 replicas. But it's not happening. </summary>
+  
+    ```bash
+    k get pods 
+    k get deploy 
+    k describe deploy app 
+    k get pods -n kube-system
+    k logs kube-controller-manager-controlplane -n kube-system
+    cat /etc/kubernetes/pki/ca.crt
+    vi /etc/kubernetes/manifests/kube-controller-manager.yaml 
+    k get pods -n kube-system --watch
+    k get pods 
+    k get deploy 
     ```
    
     </details>
