@@ -47,6 +47,11 @@
 [Day20-Ingress Networking 2](#practice-test---ingress-networking-2)<br>
 [Day21-Install kubernetes cluster using kubeadm tool](#practice-test---install-kubernetes-cluster-using-kubeadm-tool)<br>
 [Day21-Application Failure](#practice-test---application-failure)<br>
+[Day22-Control Plane Failure](#practice-test---control-plane-failure)<br>
+[Day22-Worker Node Failure](#practice-test---worker-node-failure)<br>
+[Day22-Troubleshoot Network](#practice-test---troubleshoot-network)<br>
+[Day22-Advance Kubectl Commands](#practice-test---advance-kubectl-commands)<br>
+[Day22-Lightning Lab1](#practice-test---lightning-lab1)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -4447,6 +4452,7 @@
     ```
    
     </details>
+
 ## Practice Test - Control Plane Failure
 1. <details>
     <summary>The cluster is broken. We tried deploying an application but it's not working. Troubleshoot and fix the issue. </summary>
@@ -4517,6 +4523,286 @@
     k get pods -n kube-system --watch
     k get pods 
     k get deploy 
+    ```
+   
+    </details>
+
+## Practice Test - Worker Node Failure
+1. <details>
+    <summary>Fix the broken cluster </summary>
+  
+    ```bash
+    k get nodes
+    k describe node node01 
+    ssh node01
+    service kubelet status 
+    service kubelet start 
+    service kubelet status 
+    exit 
+    kubectl get nodes 
+    ```
+   
+    </details>
+
+> H
+2. <details>
+    <summary>The cluster is broken again. Investigate and fix the issue. </summary>
+  
+    ```bash
+    kubectl get nodes 
+    kubectl describe node node01 
+    ssh node01 
+    service kubelet status 
+    service kubelet start 
+    service kubelet status 
+    journalctl -u kubelet 
+    ls /etc/kubernetes/kubelet.conf 
+    cat /etc/kubernetes/kubelet.conf 
+    ls /var/lib/kuelet/ 
+    cat /var/lib/kuelet/config.yaml
+    ls /etc/kubernetes/pki/ca.crt
+    vi /var/lib/kubelet/config.yaml # /etc/kubernetes/pki/ca.crt
+    service kubelet restart 
+    service kubelet status 
+    exit 
+    kubectl get nodes 
+    ```
+   
+    </details>
+
+3. <details>
+    <summary>The cluster is broken again. Investigate and fix the issue. </summary>
+  
+    ```bash
+    kubectl get nodes 
+    ssh node01 
+    service kubelet status 
+    journalctl -u kubelet 
+    ls /etc/kubernetes/kubelet.conf 
+    vi /etc/kubernetes/kubelet.conf # 6443
+    vi /var/lib/kubelet/config.yaml 
+    service kubelet restart 
+    service kubelet status 
+    exit 
+    kubectl get nodes 
+    ```
+   
+    </details>
+
+## Practice Test - Troubleshoot Network
+1. <details>
+    <summary>A simple 2 tier application is deployed in the triton namespace. It must display a green web page on success. Click on the app tab at the top of your terminal to view your application. It is currently failed. Troubleshoot and fix the issue. </summary>
+  
+    ```bash
+    kubectl get nodes
+    kubectl get pods -A
+    kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
+    kubectl get pods -n triton
+    ```
+   
+    </details>
+
+2. <details>
+    <summary>The same 2 tier application is having issues again. It must display a green web page on success. Click on the app tab at the top of your terminal to view your application. It is currently failed. Troubleshoot and fix the issue. </summary>
+  
+    ```bash
+    kubectl get nodes
+    kubectl get pods -A
+    kubectl -n kube-system logs kube-proxy-tzrs9
+    ls -l /var/lib/kube-proxy
+    kubectl get ds -n kube-system kube-proxy -o yaml | less
+    kubectl describe cm -n kube-system kube-proxy
+    kubectl edit ds -n kube-system kube-proxy # --config=/var/lib/kube-proxy/config.conf
+    kubectl get pods -n kube-system
+    ```
+   
+    </details>
+
+# Other Topics   
+## Practice Test - Advance Kubectl Commands
+1. <details>
+    <summary>Get the list of nodes in JSON format and store it in a file at /opt/outputs/nodes.json. </summary>
+  
+    ```bash
+    kubectl get nodes -o json > /opt/outputs/nodes.json
+    ```
+   
+    </details>
+
+2. <details>
+    <summary>Get the details of the node node01 in json format and store it in the file /opt/outputs/node01.json. </summary>
+  
+    ```bash
+    kubectl get node node01 -o json > /opt/outputs/node01.json
+    ```
+   
+    </details>
+
+3. <details>
+    <summary>Use JSON PATH query to fetch node names and store them in /opt/outputs/node_names.txt. </summary>
+  
+    ```bash
+    kubectl get nodes -o=jsonpath='{.items[*].metadata.name}' > /opt/outputs/node_names.txt
+    ```
+   
+    </details>
+
+4. <details>
+    <summary>Use JSON PATH query to retrieve the osImages of all the nodes and store it in a file /opt/outputs/nodes_os.txt. </summary>
+  
+    ```bash
+    kubectl get nodes -o jsonpath='{.items[*].status.nodeInfo.osImage}' > /opt/outputs/nodes_os.txt
+    ```
+   
+    </details>
+
+5. <details>
+    <summary>A kube-config file is present at /root/my-kube-config. Get the user names from it and store it in a file /opt/outputs/users.txt. </summary>
+  
+    ```bash
+    kubectl config view --kubeconfig=my-kube-config -o jsonpath="{.users[*].name}" > /opt/outputs/users.txt
+    ```
+   
+    </details>
+
+6. <details>
+    <summary>A set of Persistent Volumes are available. Sort them based on their capacity and store the result in the file /opt/outputs/storage-capacity-sorted.txt. </summary>
+  
+    ```bash
+    kubectl get pv --sort-by=.spec.capacity.storage > /opt/outputs/storage-capacity-sorted.txt
+    ```
+   
+    </details>
+
+7. <details>
+    <summary>That was good, but we don't need all the extra details. Retrieve just the first 2 columns of output and store it in /opt/outputs/pv-and-capacity-sorted.txt. </summary>
+  
+    ```bash
+    kubectl get pv --sort-by=.spec.capacity.storage -o=custom-columns=NAME:.metadata.name,CAPACITY:.spec.capacity.storage > /opt/outputs/pv-and-capacity-sorted.txt
+    ```
+   
+    </details>
+
+8. <details>
+    <summary>Use a JSON PATH query to identify the context configured for the aws-user in the my-kube-config context file and store the result in /opt/outputs/aws-context-name. </summary>
+  
+    ```bash
+    kubectl config view --kubeconfig=my-kube-config -o jsonpath="{.contexts[?(@.context.user=='aws-user')].name}" > /opt/outputs/aws-context-name
+    ```
+   
+    </details>
+
+# Lightning Lab
+## Practice Test - Lightning Lab1
+> H
+1. <details>
+    <summary>Upgrade the current version of kubernetes from 1.25.0 to 1.26.0 exactly using the kubeadm utility. Make sure that the upgrade is carried out one node at a time starting with the controlplane node. To minimize downtime, the deployment gold-nginx should be rescheduled on an alternate node before upgrading each node. </summary>
+  
+    ```bash
+    kubectl drain controlplane --ignore-daemonsets
+   
+    apt-get update
+    apt-mark unhold kubeadm
+    apt-get install -y kubeadm=1.26.0-00
+    kubeadm upgrade plan
+    kubeadm upgrade apply v1.26.0
+    kubectl describe node controlplane | grep -A 3 taint
+    kubectl taint node controlplane node-role.kubernetes.io/control-plane:NoSchedule-
+    kubectl taint node controlplane node.kubernetes.io/unschedulable:NoSchedule-
+    apt-mark unhold kubelet
+    apt-get install -y kubelet=1.26.0-00
+    systemctl daemon-reload
+    systemctl restart kubelet
+    kubectl uncordon controlplane
+    apt-mark unhold kubectl
+    apt-get install -y kubectl=1.26.0-00
+    apt-mark hold kubeadm kubelet kubectl
+    kubectl drain node01 --ignore-daemonsets
+   
+    ssh node01
+    apt-get update
+    apt-mark unhold kubeadm
+    apt-get install -y kubeadm=1.26.0-00
+    kubeadm upgrade node
+    apt-mark unhold kubelet
+    apt-get install kubelet=1.26.0-00
+    systemctl daemon-reload
+    systemctl restart kubelet
+    apt-mark hold kubeadm kubelet
+    exit
+    kubectl uncordon node01
+    kubectl get pods -o wide | grep gold-nginx
+    ```
+   
+    </details>
+
+> H
+2. <details>
+    <summary>Print the names of all deployments in the admin2406 namespace in the following format: </summary>
+  
+    ```bash
+    # custom-columns
+    kubectl -n admin2406 get deployment -o custom-columns=DEPLOYMENT:.metadata.name,CONTAINER_IMAGE:.spec.template.spec.containers[].image,READY_REPLICAS:.status.readyReplicas,NAMESPACE:.metadata.namespace --sort-by=.metadata.name > /opt/admin2406_data
+    ```
+   
+    </details>
+   
+3. <details>
+    <summary>A kubeconfig file called admin.kubeconfig has been created in /root/CKA. There is something wrong with the configuration. Troubleshoot and fix it </summary>
+  
+    ```bash
+    kubectl get pods --kubeconfig /root/CKA/admin.kubeconfig
+    cat ~/.kube/config
+    vi /root/CKA/admin.kubeconfig # 6443
+    kubectl get pods --kubeconfig /root/CKA/admin.kubeconfig
+    ```
+   
+    </details>
+
+4. <details>
+    <summary>Create a new deployment called nginx-deploy, with image nginx:1.16 and 1 replica. Next upgrade the deployment to version 1.17 using rolling update. </summary>
+  
+    ```bash
+    kubectl create deployment nginx-deploy --image=nginx:1.16
+    kubectl set image deployment/nginx-deploy nginx=nginx:1.17 --record
+    ```
+   
+    </details>
+
+> H
+5. <details>
+    <summary>A new deployment called alpha-mysql has been deployed in the alpha namespace. However, the pods are not running. Troubleshoot and fix the issue. The deployment should make use of the persistent volume alpha-pv to be mounted at /var/lib/mysql and should use the environment variable MYSQL_ALLOW_EMPTY_PASSWORD=1 to make use of an empty root password.</summary>
+  
+    ```bash
+    kubectl get deployment -n alpha alpha-mysql  -o yaml | yq e .spec.template.spec.containers -
+    kubectl get pods -n alpha
+    kubectl describe pod -n alpha alpha-mysql-6d945ffc78-v6ddg
+    kubectl get pv alpha-pv
+    ```
+   
+    </details>
+
+6. <details>
+    <summary>Take the backup of ETCD at the location /opt/etcd-backup.db on the controlplane node. </summary>
+  
+    ```bash
+    ETCDCTL_API='3' etcdctl snapshot save \
+    --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+    --cert=/etc/kubernetes/pki/etcd/server.crt \
+    --key=/etc/kubernetes/pki/etcd/server.key \
+    /opt/etcd-backup.db
+    ```
+   
+    </details>
+
+> N
+7. <details>
+    <summary>Create a pod called secret-1401 in the admin1401 namespace using the busybox image. The container within the pod should be called secret-admin and should sleep for 4800 seconds. </summary>
+  
+    ```bash
+    kubectl run secret-1401 -n admin1401 --image busybox --dry-run=client -o yaml --command -- sleep 4800 > admin.yaml
+    vi admin.yaml
+    kubectl create -f admin.yaml
     ```
    
     </details>
