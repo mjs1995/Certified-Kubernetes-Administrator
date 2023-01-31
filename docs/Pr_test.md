@@ -52,6 +52,7 @@
 [Day22-Troubleshoot Network](#practice-test---troubleshoot-network)<br>
 [Day22-Advance Kubectl Commands](#practice-test---advance-kubectl-commands)<br>
 [Day22-Lightning Lab1](#practice-test---lightning-lab1)<br>
+[Day23-Mock Exam - 1](#mock-exam---1)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -4803,6 +4804,169 @@
     kubectl run secret-1401 -n admin1401 --image busybox --dry-run=client -o yaml --command -- sleep 4800 > admin.yaml
     vi admin.yaml
     kubectl create -f admin.yaml
+    ```
+   
+    </details>
+
+# Mock Exams
+## Mock Exam - 1
+1. <details>
+    <summary>Deploy a pod named nginx-pod using the nginx:alpine image. </summary>
+  
+    ```bash
+    k
+    kubectl get + 탭2번
+    # kubectl cheat 검색 : https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+    source <(kubectl completion bash) # set up autocomplete in bash into the current shell, bash-completion package should be installed first.
+    echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplete permanently to your bash shell.
+    alias k=kubectl
+    complete -o default -F __start_kubectl k
+    
+    k run nginx-pod --image=nginx:alpine
+    k get pod 
+    k describe pod nginx-pod 
+    ```
+   
+    </details>
+
+2. <details>
+    <summary>Deploy a messaging pod using the redis:alpine image with the labels set to tier=msg. </summary>
+  
+    ```bash
+    k run --help 
+    kubectl run messaging --image=redis:alpine --labels="tier=msg"
+    k get pod 
+    k describe pod messaging
+    ```
+   
+    </details>
+
+3. <details>
+    <summary>Create a namespace named apx-x9984574. </summary>
+  
+    ```bash
+    k create namespace apx-x9984574
+    k get ns 
+    ```
+   
+    </details>
+
+> N 
+4. <details>
+    <summary>Get the list of nodes in JSON format and store it in a file at /opt/outputs/nodes-z3444kd9.json. </summary>
+  
+    ```bash
+    k get nodes 
+    k get nodes -o json > /opt/outputs/nodes-z3444kd9.json
+    cat /opt/outputs/nodes-z3444kd9.json
+    ```
+   
+    </details>
+
+5. <details>
+    <summary>Create a service messaging-service to expose the messaging application within the cluster on port 6379. Use imperative commands. Service: messaging-servicePort: 6379 Type: ClusterIp Use the right labels </summary>
+  
+    ```bash
+    k get pods 
+    k get svc 
+    k expose --help # kubectl expose pod valid-pod --port=444 --name=frontend
+    kubectl expose pod messaging --port=6379 --name=messaging-service
+    k get svc 
+    k describe svc messaging-service
+    k get pods -o wide
+    ```
+   
+    </details>
+
+6. <details>
+    <summary>Create a deployment named hr-web-app using the image kodekloud/webapp-color with 2 replicas. Name: hr-web-app / Image: kodekloud/webapp-color / Replicas: 2 </summary>
+  
+    ```bash
+    k create deployment hr-web-app --image=kodekloud/webapp-color --replicas=2
+    k get deploy 
+    k describe deploy hr-web-app
+    ```
+   
+    </details>
+
+> H
+7. <details>
+    <summary>Create a static pod named static-busybox on the controlplane node that uses the busybox image and the command sleep 1000. Name: static-busybox / Image: busybox </summary>
+  
+    ```bash
+    k run static-busybox --image=busybox --dry-run=client -o yaml --command -- sleep 1000 > static-busybox.yaml
+    cat static-busybox.yaml    
+    mv static-busybox.yaml /etc/kubernetes/manifests/
+    kubectl get pods 
+    k describe pod static-busybox-controlplane
+    ```
+   
+    </details>
+
+8. <details>
+    <summary>Create a POD in the finance namespace named temp-bus with the image redis:alpine. / Name: temp-bus / Image Name: redis:alpine </summary>
+  
+    ```bash
+    k run temp-bus --image=redis:alpine -n finance
+    k get pod -n finance
+    k describe pod temp-bus -n finance
+    ```
+   
+    </details>
+
+> V
+9. <details>
+    <summary>A new application orange is deployed. There is something wrong with it. Identify and fix the issue. / Issue fixed </summary>
+  
+    ```bash
+    k get pod # Init 컨테이너 문제 
+    k describe pod orange 
+    k logs orange init-myservice
+    k edit pod orange # sleep
+    k replace --force -f /tmp/kubectl-edit-1117791310.yaml
+    k get pods --watch 
+    ```
+   
+    </details>
+
+10. <details>
+    <summary>Expose the hr-web-app as service hr-web-app-service application on port 30082 on the nodes on the cluster. / The web application listens on port 8080. / Name: hr-web-app-service / Type: NodePort / Endpoints: 2 / Port: 8080 / NodePort: 30082 </summary>
+  
+    ```bash
+    k get deploy
+    k expose deploy hr-web-app --name=hr-web-app-service --type NodePort --port 8080 
+    k get svc # 노드포트가 다름 
+    k describe svc hr-web-app
+    k edit svc hr-web-app-service # 30082
+    k get svc 
+    ```
+   
+    </details>
+
+11. <details>
+    <summary>Use JSON PATH query to retrieve the osImages of all the nodes and store it in a file /opt/outputs/nodes_os_x43kj56.txt. / The osImages are under the nodeInfo section under status of each node. / Task Completed </summary>
+  
+    ```bash
+    k get nodes 
+    k get nodes -o json 
+    # kubectl cheat 검색 : https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+    kubectl get nodes -o jsonpath='{.items[*].status.nodeInfo.osImage}'
+    kubectl get nodes -o jsonpath='{.items[*].status.nodeInfo.osImage}' > /opt/outputs/nodes_os_x43kj56.txt
+    cat /opt/outputs/nodes_os_x43kj56.txt
+    ```
+   
+    </details>
+
+> V
+12. <details>
+    <summary>Create a Persistent Volume with the given specification. / Volume Name: pv-analytics / Storage: 100Mi / Access modes: ReadWriteMany / Host Path: /pv/data-analytics / Task Completed </summary>
+  
+    ```bash
+    # Persistent Volume 검색 : [https://kubernetes.io/docs/reference/kubectl/cheatsheet/](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+    vi pv.yaml 
+    k create -f pv.yaml 
+    k get pv 
+    k describe pv pv-analytics
     ```
    
     </details>
