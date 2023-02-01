@@ -4970,3 +4970,122 @@
     ```
    
     </details>
+
+## Mock Exam - 2
+1. <details>
+    <summary>Take a backup of the etcd cluster and save it to /opt/etcd-backup.db. / Backup Completed </summary>
+  
+    ```bash
+    # kubectl cheat 검색 : https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+    source <(kubectl completion bash) # set up autocomplete in bash into the current shell, bash-completion package should be installed first.
+    echo "source <(kubectl completion bash)" >> ~/.bashrc # add autocomplete permanently to your bash shell.
+    alias k=kubectl
+    complete -o default -F __start_kubectl k
+    
+    # etdc backup 검색 : https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/
+    # ETCDCTL_API=3 etcdctl --endpoints $ENDPOINT snapshot save snapshotdb
+    ETCDCTL_API=3 etcdctl snapshot save -h
+    cat /etc/kubernetes/manifests/etcd.yaml | grep file 
+    vi /etc/kubernetes/manifests/etcd.yaml
+   
+    ETCDCTL_API=3 etcdctl --endpoints 127.0.0.1:2379 snapshot save /opt/etcd-backup.db. \
+    --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+    --cert=/etc/kubernetes/pki/etcd/server.crt \
+    --key=/etc/kubernetes/pki/etcd/server.key
+   
+    ls /opt/etcd-backup.db. 
+    ```
+   
+    </details>
+
+> V
+2. <details>
+    <summary> Create a Pod called redis-storage with image: redis:alpine with a Volume of type emptyDir that lasts for the life of the Pod. / Specs on the below. / Pod named 'redis-storage' created / Pod 'redis-storage' uses Volume type of emptyDir / Pod 'redis-storage' uses volumeMount with mountPath = /data/redis </summary>
+  
+    ```bash
+    k run redis-storage --image=redis:alpine --dry-run=client -o yaml
+    k run redis-storage --image=redis:alpine --dry-run=client -o yaml > redis-storage.yaml 
+    # pod volumn 검색 : https://kubernetes.io/docs/concepts/storage/volumes/#emptydir
+    vi redis-storage.yaml 
+    k create -f redis-storage.yaml
+    k get pods
+    k get pods --watch
+    k describe pod redis-storage
+    ```
+   
+    </details>
+
+> V
+3. <details>
+    <summary> Create a new pod called super-user-pod with image busybox:1.28. Allow the pod to be able to set system_time. / The container should sleep for 4800 seconds. / Pod: super-user-pod / Container Image: busybox:1.28 / SYS_TIME capabilities for the conatiner? </summary>
+  
+    ```bash
+    k run --help
+    k run super-user-pod --image=busybox:1.28 --dry-run=client -o yaml
+    k run super-user-pod --image=busybox:1.28 --dry-run=client -o yaml > super-user-pod.yaml 
+    vi super-user-pod.yaml 
+    # security capabilities 검색 : https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container    
+    k create -f super-user-pod.yaml
+    k get pods
+    k get pods --watch
+    k describe pod super-user-pod
+    ```
+   
+    </details>
+
+> V
+4. <details>
+    <summary> A pod definition file is created at /root/CKA/use-pv.yaml. Make use of this manifest file and mount the persistent volume called pv-1. Ensure the pod is running and the PV is bound. / mountPath: /data / persistentVolumeClaim Name: my-pvc / persistentVolume Claim configured correctly / pod using the correct mountPath / pod using the persistent volume claim? </summary>
+  
+    ```bash
+    cat /root/CKA/use-pv.yaml 
+    k get pv
+    k get pvc 
+    # pvc 검색 : https://kubernetes.io/docs/concepts/storage/persistent-volumes/#claims-as-volumes
+    vi pvc.yaml 
+    k create -f pvc.yaml
+    vi /root/CKA/use-pv.yaml
+    k create -f /root/CKA/use-pv.yaml
+    k get pods 
+    cat /root/CKA/use-pv.yaml
+    k describe pod use-pv
+    ```
+   
+    </details>
+
+> V
+5. <details>
+    <summary> Create a new deployment called nginx-deploy, with image nginx:1.16 and 1 replica. Next upgrade the deployment to version 1.17 using rolling update. Deployment : nginx-deploy. Image: nginx:1.16 / Image: nginx:1.16 / Task: Upgrade the version of the deployment to 1:17 / Task: Record the changes for the image upgrade </summary>
+  
+    ```bash
+    k create deploy nginx-deploy --image=nginx:1.16 --replicas=1 
+    k get deploy
+    k describe deploy nginx-deploy
+    k set image --help 
+    kubectl set image deployment/nginx-deploy nginx=nginx:1.1.7
+    k describe deploy nginx-deploy
+    ```
+   
+    </details>
+
+> VV
+6. <details>
+    <summary> Create a new user called john. Grant him access to the cluster. John should have permission to create, list, get, update and delete pods in the development namespace . The private key exists in the location: /root/CKA/john.key and csr at /root/CKA/john.csr. / Important Note: As of kubernetes 1.19, the CertificateSigningRequest object expects a signerName. / Please refer the documentation to see an example. The documentation tab is available at the top right of terminal. / CSR: john-developer Status:Approved / Role Name: developer, namespace: development, Resource: Pods / Access: User 'john' has appropriate permissions </summary>
+
+  
+    ```bash
+    ls /root/CKA/
+    cd /root/CKA
+    ls 
+    cat john.csr 
+    # 검색 : role binding : https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/
+    vi john-csr.yaml
+    cat john.csr | base64 | tr -d "\n"
+    vi john-csr.yaml
+    k create -f john-csr.yaml
+    k get csr 
+    k certificate approve john-developer
+    k get csr 
+    ```
+   
+    </details>
