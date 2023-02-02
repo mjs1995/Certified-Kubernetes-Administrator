@@ -53,6 +53,7 @@
 [Day22-Advance Kubectl Commands](#practice-test---advance-kubectl-commands)<br>
 [Day22-Lightning Lab1](#practice-test---lightning-lab1)<br>
 [Day23-Mock Exam - 1](#mock-exam---1)<br>
+[Day24-Mock Exam - 2](#mock-exam---2)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -5086,6 +5087,42 @@
     k get csr 
     k certificate approve john-developer
     k get csr 
+    ```
+   
+    </details>
+
+> V
+7. <details>
+    <summary> Create a nginx pod called nginx-resolver using image nginx, expose it internally with a service called nginx-resolver-service. Test that you are able to look up the service and pod names from within the cluster. Use the image: busybox:1.28 for dns lookup. Record results in /root/CKA/nginx.svc and /root/CKA/nginx.pod / Pod: nginx-resolver created / Service DNS Resolution recorded correctly / Pod DNS resolution recorded correctly </summary>
+  
+    ```bash
+    k run nginx-resolver --image=nginx
+    k get pods 
+    k expose pod nginx-resolver --name=nginx-resolver-service --port=80
+    k describe svc nginx-resolver-service
+    k run busybox --image=busybox:1.28 -- sleep 4000 
+    k get pods
+    k exec busybox -- nslookup nginx-resolver-service > /root/CKA/nginx.svc
+    k get pods -o wide 
+    # DNS 검색 : https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+    k exec busybox -- nslookup 10-244-192-1.default.pod.cluster.local
+    k exec busybox -- nslookup 10-244-192-1.default.pod.cluster.local > /root/CKA/nginx.svc 
+    ```
+   
+    </details>
+
+8. <details>
+    <summary> Create a static pod on node01 called nginx-critical with image nginx and make sure that it is recreated/restarted automatically in case of a failure. / Use /etc/kubernetes/manifests as the Static Pod path for example. / static pod configured under /etc/kubernetes/manifests ? / Pod nginx-critical-node01 is up and running </summary>
+  
+    ```bash
+    k get nodes -o wide # 10.54.115.6
+    ssh 10.54.115.6
+    ls /etc/kubernetes/manifests/
+    kubectl run --help 
+    kubectl run nginx-critical --image=nginx --restart=Always --dry-run=client -o yaml 
+    cat > /etc/kubernetes/manifests/nginx-critcal.yaml # node01
+    kubectl get pods 
+    kubectl describe pods nginx-resolver
     ```
    
     </details>
