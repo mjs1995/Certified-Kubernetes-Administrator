@@ -54,6 +54,7 @@
 [Day22-Lightning Lab1](#practice-test---lightning-lab1)<br>
 [Day23-Mock Exam - 1](#mock-exam---1)<br>
 [Day24-Mock Exam - 2](#mock-exam---2)<br>
+[Day25-Mock Exam - 3](#mock-exam---3)<br>
 
 # Core Concepts
 ## Practice Test - PODs
@@ -5123,6 +5124,155 @@
     cat > /etc/kubernetes/manifests/nginx-critcal.yaml # node01
     kubectl get pods 
     kubectl describe pods nginx-resolver
+    ```
+   
+    </details>
+
+## Mock Exam - 3
+1. <details>
+    <summary> Create a new service account with the name pvviewer. Grant this Service account access to list all PersistentVolumes in the cluster by creating an appropriate cluster role called pvviewer-role and ClusterRoleBinding called pvviewer-role-binding. / Next, create a pod called pvviewer with the image: redis and serviceAccount: pvviewer in the default namespace./ ServiceAccount: pvviewer / ClusterRole: pvviewer-role / ClusterRoleBinding: pvviewer-role-binding / Pod: pvviewer / Pod configured to use ServiceAccount pvviewer ? </summary>
+  
+    ```bash
+    k create serviceaccount --help
+    k create serviceaccount pvviewer
+    k create clusterrole --help 
+    k api-resources | grep persistent
+    k create clusterrole pvviewer-role --verb=list --resource=persistentvolumeclaims
+    k create clusterrolebinding --help
+    k create clusterrolebinding pvviewer-role-binding --clusterrole=pvviewer-role --serviceaccount=default:pvviewer
+    k describe clusterrole pvviewer-role
+    k describe clusterrolebindings.rbac.authorization.k8s.io pvviewer-role-binding
+    k run pvviewer --image=redis --serviceaccount=pvviewer #?? 
+    k get pods 
+    k get pods pvviewer -o yaml 
+    ```
+   
+    </details>
+
+2. <details>
+    <summary>List the InternalIP of all nodes of the cluster. Save the result to a file /root/CKA/node_ips. / Answer should be in the format: InternalIP of controlplane<space>InternalIP of node01 (in a single line) </summary>
+  
+    ```bash
+    k get nodes 
+    k get nodes -o wide 
+    k get nodes -o json | jq -c 'paths' | grep InterIP
+    k get nodes -o json | grep InterIP
+    k get nodes -o json | jq -c 'paths' | grep InterIP | grep type 
+    k get nodes -o json | jq -c 'paths' | grep InterIP | grep type  grep -v "metadata"
+    k get nodes -o json | jq -c 'paths' | grep type | grep -v "metadata" | grep address 
+    # cheatsheat 검색 
+    k get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="InternalIP")].address}' > /root/CKA/node_ips
+    ```
+   
+    </details>
+
+3. <details>
+    <summary>Create a pod called multi-pod with two containers.Container 1, name: alpha, image: nginx /Container 2: name: beta, image: busybox, command: sleep 4800 / Environment Variables: container 1: name: alpha / Container 2: name: beta Pod Name: multi-pod / Container 1: alpha / Container 2: beta / Container beta commands set correctly? Container 1 Environment Value Set / Container 2 Environment Value Set </summary>
+  
+    ```bash
+    k run multi-pod --image=busybox --command --dry-run=client -o yaml -- sleep 4800
+    k run multi-pod --image=busybox --command --dry-run=client -o yaml -- sleep 4800 > multi-pod.yaml
+    vi multi-pod.yaml
+    # environment variables 검색 : https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+    k create -f multi-pod.yaml
+    k get pods
+    k describe pod multi-pod
+    ```
+   
+    </details>
+
+4. <details>
+    <summary>Create a Pod called non-root-pod , image: redis:alpine / runAsUser: 1000 / fsGroup: 2000 / Pod non-root-pod fsGroup configured/ Pod non-root-pod runAsUser configured </summary>
+  
+    ```bash
+    k run non-root-pod --image=redis:alpine --command --dry-run=client -o yaml 
+    k run non-root-pod --image=redis:alpine --command --dry-run=client -o yaml > non-root-pod.yaml
+    vi non-root-pod.yaml
+    # security context 검색 : https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+    k create -f non-root-pod.yaml
+    k get pods
+    k describe pod non-root-pod
+    ```
+   
+    </details>
+
+> N
+5. <details>
+    <summary>We have deployed a new pod called np-test-1 and a service called np-test-service. Incoming connections to this service are not working. Troubleshoot and fix it. Create NetworkPolicy, by the name ingress-to-nptest that allows incoming connections to the service over port 80. Important: Don't delete any current objects deployed. Important: Don't Alter Existing Objects! NetworkPolicy: Applied to All sources (Incoming traffic from all pods)? NetWorkPolicy: Correct Port? NetWorkPolicy: Applied to correct Pod? </summary>
+  
+    ```bash
+    k get pods 
+    k get svc 
+    k run curl image=alpin/curl --rm -it --sh
+    curl np-test-service
+    # network policy 검색 : https://kubernetes.io/docs/concepts/services-networking/network-policies/ 
+    vi np.yaml 
+    k create -f np.yaml
+    ```
+   
+    </details>
+
+6. <details>
+    <summary>Taint the worker node node01 to be Unschedulable. Once done, create a pod called dev-redis, image redis:alpine, to ensure workloads are not scheduled to this worker node. Finally, create a new pod called prod-redis and image: redis:alpine with toleration to be scheduled on node01. / key: env_type, value: production, operator: Equal and effect: NoSchedule / Key = env_type / Value = production / Effect = NoSchedule/ pod 'dev-redis' (no tolerations) is not scheduled on node01? Create a pod 'prod-redis' to run on node01 </summary>
+  
+    ```bash
+    k taint --hekp 
+    kubectl taint node node01 env_type=production:NoSchedule
+    k get nodes
+    k describe node node01 
+    kubectl run dev-redis --image=redis:alpine
+    kubectl get pods -o wide
+    k run prod-redis --image=redis:alpine --dry-run=client -o yaml > prod-redis.yaml
+    vi prod-redis.yaml
+    # 검색 tolerations : https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
+    k create -f prod-redis.yaml
+    k describe pod prod-redis
+    k get pods -o wide
+    ```
+   
+    </details>
+
+7. <details>
+    <summary>Create a pod called hr-pod in hr namespace belonging to the production environment and frontend tier . image: redis:alpine / Use appropriate labels and create all the required objects if it does not exist in the system already. / hr-pod labeled with environment production? / hr-pod labeled with tier frontend? </summary>
+  
+    ```bash
+    k get pods -n hr
+    k get namespace 
+    k create namespace hr 
+    k run hr-pod --image=redis:alpine --namespace=hr --labels=environment=production,tier=frontend
+    k get pods -o wide 
+    k describe pod hr-pod -n hr
+    ```
+   
+    </details>
+
+8. <details>
+    <summary>A kubeconfig file called super.kubeconfig has been created under /root/CKA. There is something wrong with the configuration. Troubleshoot and fix it. / Fix /root/CKA/super.kubeconfig </summary>
+  
+    ```bash
+    ls /root/CKA
+    k get nodes -kubeconfig /root/CKA/super.kubeconfig
+    cat /root/CKA/super.kubeconfig
+    cat .kube/config 
+    vi /root/CKA/super.kubeconfig #6443
+    k get nodes --kubeconfig /root/CKA/super.kubeconfig
+    ```
+   
+    </details>
+
+9. <details>
+    <summary>We have created a new deployment called nginx-deploy. scale the deployment to 3 replicas. Has the replica's increased? Troubleshoot the issue and fix it. deployment has 3 replicas </summary>
+  
+    ```bash
+    k get deploy 
+    k scale deployment nginx-deploy --replicas=3
+    k get deploy
+    k describe deploy nginx-deploy
+    k get pods -n kube-system 
+    k describe pod -n kube-system kube-contro1ler-manager-controlplane
+    cat /etc/kubernetes/manifests/kube-controller-manager.yaml
+    vi /etc/kubernetes/manifests/kube-controller-manager.yaml # /contro1 검색해서 수정 
+    k get deploy --watch 
     ```
    
     </details>
